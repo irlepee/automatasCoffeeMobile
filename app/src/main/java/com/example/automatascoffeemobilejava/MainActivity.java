@@ -1,7 +1,12 @@
 package com.example.automatascoffeemobilejava;
 
+import android.content.Context;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -19,11 +24,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
+        // Inicializar los elementos de la vista
         Button btnLogin = findViewById(R.id.btnLogin);
         EditText txtUser = findViewById(R.id.txtUser);
         EditText txtPassword = findViewById(R.id.txtPassword);
         ConstraintLayout loginCard = findViewById(R.id.loginCard);
         FrameLayout opacityCard = findViewById(R.id.opacityCard);
+
+        // Para que la barra de estado sea transparente
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            );
+            window.setStatusBarColor(Color.TRANSPARENT);
+        }
+
 
         btnLogin.setOnClickListener(v -> {
             String username = txtUser.getText().toString();
@@ -47,6 +63,12 @@ public class MainActivity extends AppCompatActivity {
                                     .withEndAction(() -> opacityCard.setVisibility(View.GONE))
                                     .start();
                         });
+                //Oculta el teclado al hacer click en el botón
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                View view = getCurrentFocus();
+                if (view != null) {
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
             } else {
                 loginCard.animate()
                                 .translationX(15f)
