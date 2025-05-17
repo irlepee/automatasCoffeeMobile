@@ -1,13 +1,19 @@
 package com.example.automatascoffeemobilejava;
 
+import static android.content.ContentValues.TAG;
+import static com.example.automatascoffeemobilejava.utils.DimensionUtils.dpToPx;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -15,9 +21,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.FragmentContainerView;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -39,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         //-Inicio-
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
@@ -50,18 +60,41 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         FrameLayout opacityCard = findViewById(R.id.opacityCard);
         ConstraintLayout topCard = findViewById(R.id.topCard);
         ConstraintLayout bottomCard = findViewById(R.id.bottomCard);
+        FragmentContainerView map = findViewById(R.id.map);
+        ImageButton bottomCardOpenerCloser = findViewById(R.id.bottomCardOpenerCloser);
+
+        float bottomCardmMaximumHeight = dpToPx(this, 250);
+        float bottomCardMinimalHeight = dpToPx(this, 100);
+        float bottomCardStartHeight = dpToPx(this, 150);
+        float bottomCardUmbralHeight = dpToPx(this, 175);
+
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int screenHeight = metrics.heightPixels;
+
+        float notificationBarHeight = dpToPx(this, 38);
+        float UmbralHeightToPX = dpToPx(this, bottomCardUmbralHeight);
+
+        float maxY = screenHeight - bottomCardmMaximumHeight;
+        float minY = screenHeight - bottomCardMinimalHeight;
+
+        float bottomCardClosedHeight = screenHeight + notificationBarHeight - bottomCardMinimalHeight;
+        float bottomCardOpenHeight = screenHeight + notificationBarHeight - bottomCardmMaximumHeight;
+
+
         topCard.setScaleX(0);
         topCard.setScaleY(0);
         topCard.setVisibility(View.GONE);
         bottomCard.setScaleX(0);
         bottomCard.setScaleY(0);
-        bottomCard.setTranslationY(300);
+        bottomCard.setTranslationY(bottomCardMinimalHeight);
         bottomCard.setVisibility(View.GONE);
 
 
-        //Obtiene los DP
-        float DP = 100f;
-        float PX = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DP, getResources().getDisplayMetrics());
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+
+        txtUser.setText("ale");
+        txtPassword.setText("123");
 
 
         //-Barra de estado transparente-
@@ -80,10 +113,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
 
-
-
         //---LOGIN---
         btnLogin.setOnClickListener(v -> {
+
+            //--VIBRADOR--
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                vibrator.vibrate(100); // 100 ms
+            }
+
             String username = txtUser.getText().toString();
             String password = txtPassword.getText().toString();
 
@@ -106,16 +145,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     .withEndAction(() -> {
                                         topCard.setVisibility(View.VISIBLE);
                                         topCard.animate()
-                                                .scaleX(1.0f)
-                                                .scaleY(1.0f)
-                                                .setDuration(200)
-                                                .start();
+                                                .scaleX(1.1f)
+                                                .scaleY(1.1f)
+                                                .setDuration(100)
+                                                .withEndAction(() -> {
+                                                    topCard.animate()
+                                                            .scaleX(1.0f)
+                                                            .scaleY(1.0f)
+                                                            .setDuration(100)
+                                                            .start();
+                                                });
                                         bottomCard.setVisibility(View.VISIBLE);
                                         bottomCard.animate()
-                                                .scaleX(1.0f)
-                                                .scaleY(1.0f)
-                                                .setDuration(200)
-                                                .start();
+                                                .scaleX(1.1f)
+                                                .scaleY(1.1f)
+                                                .setDuration(100)
+                                                .withEndAction(() -> {
+                                                    bottomCard.animate()
+                                                            .scaleX(1.0f)
+                                                            .scaleY(1.0f)
+                                                            .setDuration(100)
+                                                            .start();
+                                                });
                                     });
                         });
                 //Oculta el teclado al hacer click en el botón
@@ -154,21 +205,86 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        dY = v.getY() - event.getRawY();
+                        dY = v.getY() - event.getRawY() - notificationBarHeight;
                         return true;
-
                     case MotionEvent.ACTION_MOVE:
-                        v.animate()
-                                .y(event.getRawY() + dY)
-                                .setDuration(0)
-                                .start();
+                        float newY = event.getRawY() + dY;
+                        if (newY < maxY) newY = maxY;
+                        if (newY > minY) newY = minY;
+                        v.setY(newY + notificationBarHeight);
                         return true;
-
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        if (v.getY() < bottomCardClosedHeight && v.getY() > bottomCardClosedHeight - bottomCardUmbralHeight/2) {
+                            bottomCard.animate()
+                                    .translationY(v.getY() - (screenHeight + notificationBarHeight - bottomCard.getHeight()) + (bottomCardClosedHeight - v.getY()) + 10)
+                                    .setDuration(300)
+                                    .withEndAction(() -> {
+                                        bottomCard.animate()
+                                                .translationY(v.getY() - (screenHeight + notificationBarHeight - bottomCard.getHeight()) + (bottomCardClosedHeight - v.getY()))
+                                                .setDuration(200)
+                                                .start();
+                                    });
+                        } else if (v.getY() > bottomCardOpenHeight && v.getY() < bottomCardOpenHeight + bottomCardUmbralHeight/2) {
+                            bottomCard.animate()
+                                    .translationY(0)
+                                    .setDuration(300)
+                                    .withEndAction(() -> {
+                                        bottomCard.animate()
+                                                .translationY(10)
+                                                .setDuration(200)
+                                                .start();
+                                    });
+                        }
+                        return true;
                     default:
                         return false;
                 }
             }
         });
+
+        bottomCard.post(new Runnable() {
+            @Override
+            public void run() {
+                bottomCard.setY(bottomCardStartHeight);
+            }
+        });
+
+        bottomCardOpenerCloser.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event){
+                Log.d(TAG, "" + bottomCard.getY());
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        if (bottomCard.getY() > 2000) {
+                            bottomCard.animate()
+                                    .translationY(0)
+                                    .setDuration(300)
+                                    .withEndAction(() -> {
+                                        bottomCard.animate()
+                                                .translationY(10)
+                                                .setDuration(200)
+                                                .start();
+                                    });
+                        } else {
+                            bottomCard.animate()
+                                    .translationY(v.getY() - (screenHeight + notificationBarHeight - bottomCard.getHeight()) + (bottomCardClosedHeight - v.getY()) + 10)
+                                    .setDuration(300)
+                                    .withEndAction(() -> {
+                                        bottomCard.animate()
+                                                .translationY(v.getY() - (screenHeight + notificationBarHeight - bottomCard.getHeight()) + (bottomCardClosedHeight - v.getY()))
+                                                .setDuration(200)
+                                                .start();
+                                    });
+                        }
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+
     }
 
     @Override
