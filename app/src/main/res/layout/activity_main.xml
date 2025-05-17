@@ -260,12 +260,12 @@
                 android:layout_height="46dp"
                 android:backgroundTint="#00FFFFFF"
                 android:scaleType="fitCenter"
-                android:tint="#373737"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/menuicon" />
+                app:srcCompat="@drawable/menuicon"
+                app:tint="#373737" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
