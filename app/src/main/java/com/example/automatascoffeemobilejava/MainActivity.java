@@ -16,6 +16,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -60,13 +61,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         FrameLayout opacityCard = findViewById(R.id.opacityCard);
         ConstraintLayout topCard = findViewById(R.id.topCard);
         ConstraintLayout bottomCard = findViewById(R.id.bottomCard);
+        ConstraintLayout bottomCardInfo = findViewById(R.id.bottomCardInfo);
         FragmentContainerView map = findViewById(R.id.map);
         ImageButton bottomCardOpenerCloser = findViewById(R.id.bottomCardOpenerCloser);
 
-        float bottomCardmMaximumHeight = dpToPx(this, 250);
-        float bottomCardMinimalHeight = dpToPx(this, 100);
-        float bottomCardStartHeight = dpToPx(this, 150);
-        float bottomCardUmbralHeight = dpToPx(this, 175);
+        int bottomCardSize = 300;
+
+        float bottomCardmMaximumHeight = dpToPx(this, bottomCardSize);
+        float bottomCardMinimalHeight = dpToPx(this, 150);
+        float bottomCardUmbralHeight = dpToPx(this, 325);
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         int screenHeight = metrics.heightPixels;
@@ -79,6 +82,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         float bottomCardClosedHeight = screenHeight + notificationBarHeight - bottomCardMinimalHeight;
         float bottomCardOpenHeight = screenHeight + notificationBarHeight - bottomCardmMaximumHeight;
+
+
+        ViewGroup.LayoutParams bottomCardLayoutParams = bottomCard.getLayoutParams();
+        bottomCardLayoutParams.height = (int) dpToPx(this, bottomCardSize);
+        ViewGroup.LayoutParams bottomCardInfoLayoutParams = bottomCardInfo.getLayoutParams();
+        bottomCardInfoLayoutParams.height = (int) dpToPx(this, bottomCardSize - 100);
+
 
 
         topCard.setScaleX(0);
@@ -246,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         bottomCard.post(new Runnable() {
             @Override
             public void run() {
-                bottomCard.setY(bottomCardStartHeight);
+                bottomCard.setY(bottomCardmMaximumHeight - bottomCardMinimalHeight);
             }
         });
 
