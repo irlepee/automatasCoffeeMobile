@@ -2,6 +2,7 @@ package com.example.automatascoffeemobilejava;
 
 import static android.content.ContentValues.TAG;
 import static com.example.automatascoffeemobilejava.utils.DimensionUtils.dpToPx;
+import static com.example.automatascoffeemobilejava.utils.DimensionUtils.pxToDp;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -65,30 +67,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         FragmentContainerView map = findViewById(R.id.map);
         ImageButton bottomCardOpenerCloser = findViewById(R.id.bottomCardOpenerCloser);
 
-        int bottomCardSize = 300;
+        int bottomCardMaximumSize = 375;
+        int bottomCardMinimalSize = 135;
 
-        float bottomCardmMaximumHeight = dpToPx(this, bottomCardSize);
-        float bottomCardMinimalHeight = dpToPx(this, 150);
-        float bottomCardUmbralHeight = dpToPx(this, 325);
+        float bottomCardmMaximumHeight = dpToPx(this, bottomCardMaximumSize);
+        float bottomCardMinimalHeight = dpToPx(this, bottomCardMinimalSize);
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         int screenHeight = metrics.heightPixels;
 
         float notificationBarHeight = dpToPx(this, 38);
-        float UmbralHeightToPX = dpToPx(this, bottomCardUmbralHeight);
 
         float maxY = screenHeight - bottomCardmMaximumHeight;
         float minY = screenHeight - bottomCardMinimalHeight;
 
         float bottomCardClosedHeight = screenHeight + notificationBarHeight - bottomCardMinimalHeight;
-        float bottomCardOpenHeight = screenHeight + notificationBarHeight - bottomCardmMaximumHeight;
+        float bottomCardOpenedHeight = screenHeight + notificationBarHeight - bottomCardmMaximumHeight;
 
 
         ViewGroup.LayoutParams bottomCardLayoutParams = bottomCard.getLayoutParams();
-        bottomCardLayoutParams.height = (int) dpToPx(this, bottomCardSize);
-        ViewGroup.LayoutParams bottomCardInfoLayoutParams = bottomCardInfo.getLayoutParams();
-        bottomCardInfoLayoutParams.height = (int) dpToPx(this, bottomCardSize - 100);
-
+        bottomCardLayoutParams.height = (int) dpToPx(this, bottomCardMaximumSize);
 
 
         topCard.setScaleX(0);
@@ -101,10 +99,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
-
-        txtUser.setText("ale");
-        txtPassword.setText("123");
 
 
         //-Barra de estado transparente-
@@ -205,8 +199,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-
-
         //---BOTTOM CARD---
         bottomCard.setOnTouchListener(new View.OnTouchListener() {
             float dY;
@@ -225,24 +217,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         return true;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
-                        if (v.getY() < bottomCardClosedHeight && v.getY() > bottomCardClosedHeight - bottomCardUmbralHeight/2) {
-                            bottomCard.animate()
-                                    .translationY(v.getY() - (screenHeight + notificationBarHeight - bottomCard.getHeight()) + (bottomCardClosedHeight - v.getY()) + 10)
-                                    .setDuration(300)
-                                    .withEndAction(() -> {
-                                        bottomCard.animate()
-                                                .translationY(v.getY() - (screenHeight + notificationBarHeight - bottomCard.getHeight()) + (bottomCardClosedHeight - v.getY()))
-                                                .setDuration(200)
-                                                .start();
-                                    });
-                        } else if (v.getY() > bottomCardOpenHeight && v.getY() < bottomCardOpenHeight + bottomCardUmbralHeight/2) {
+                        if (v.getY() - 10 < bottomCardOpenedHeight + (bottomCardClosedHeight - bottomCardOpenedHeight) / 2) {
                             bottomCard.animate()
                                     .translationY(0)
-                                    .setDuration(300)
+                                    .setDuration(200)
                                     .withEndAction(() -> {
                                         bottomCard.animate()
-                                                .translationY(10)
-                                                .setDuration(200)
+                                                .translationY(20)
+                                                .setDuration(100)
+                                                .start();
+                                    });
+                        } else if (v.getY() + 10 > bottomCardClosedHeight - (bottomCardClosedHeight - bottomCardOpenedHeight) / 2) {
+                            bottomCard.animate()
+                                    .translationY(bottomCardmMaximumHeight - bottomCardMinimalHeight + 20)
+                                    .setDuration(200)
+                                    .withEndAction(() -> {
+                                        bottomCard.animate()
+                                                .translationY(bottomCardmMaximumHeight - bottomCardMinimalHeight)
+                                                .setDuration(100)
                                                 .start();
                                     });
                         }
@@ -253,6 +245,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        //---AJUSTA EL TAMAÑO DE LA BOTTOM CARD---
         bottomCard.post(new Runnable() {
             @Override
             public void run() {
@@ -260,31 +253,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        //---BOTÓN DE LA BOTTOM CARD---
         bottomCardOpenerCloser.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
             public boolean onTouch(View v, MotionEvent event){
-                Log.d(TAG, "" + bottomCard.getY());
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        if (bottomCard.getY() > 2000) {
+                        if (bottomCard.getY() + 10 > bottomCardClosedHeight) {
                             bottomCard.animate()
                                     .translationY(0)
-                                    .setDuration(300)
+                                    .setDuration(200)
                                     .withEndAction(() -> {
                                         bottomCard.animate()
-                                                .translationY(10)
-                                                .setDuration(200)
+                                                .translationY(20)
+                                                .setDuration(100)
                                                 .start();
                                     });
                         } else {
                             bottomCard.animate()
-                                    .translationY(v.getY() - (screenHeight + notificationBarHeight - bottomCard.getHeight()) + (bottomCardClosedHeight - v.getY()) + 10)
-                                    .setDuration(300)
+                                    .translationY(bottomCardmMaximumHeight - bottomCardMinimalHeight + 20)
+                                    .setDuration(200)
                                     .withEndAction(() -> {
                                         bottomCard.animate()
-                                                .translationY(v.getY() - (screenHeight + notificationBarHeight - bottomCard.getHeight()) + (bottomCardClosedHeight - v.getY()))
-                                                .setDuration(200)
+                                                .translationY(bottomCardmMaximumHeight - bottomCardMinimalHeight)
+                                                .setDuration(100)
                                                 .start();
                                     });
                         }
@@ -294,7 +287,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         });
-
     }
 
     @Override
@@ -304,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //MODO OSCURO DEL MAPA
         try {
             boolean success = mMap.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(this, R.raw.map_blue_style)
+                    MapStyleOptions.loadRawResourceStyle(this, R.raw.map_dark_style)
             );
             if (!success) {
                 Log.e("MAPA", "El estilo no se aplicó.");
