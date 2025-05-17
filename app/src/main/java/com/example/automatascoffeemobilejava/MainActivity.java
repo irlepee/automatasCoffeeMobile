@@ -1,8 +1,6 @@
 package com.example.automatascoffeemobilejava;
 
-import static android.content.ContentValues.TAG;
 import static com.example.automatascoffeemobilejava.utils.DimensionUtils.dpToPx;
-import static com.example.automatascoffeemobilejava.utils.DimensionUtils.pxToDp;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -18,7 +16,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -296,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //MODO OSCURO DEL MAPA
         try {
             boolean success = mMap.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(this, R.raw.map_dark_style)
+                    MapStyleOptions.loadRawResourceStyle(this, R.raw.map_dark_brown_style)
             );
             if (!success) {
                 Log.e("MAPA", "El estilo no se aplicó.");
