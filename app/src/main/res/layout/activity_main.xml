@@ -135,7 +135,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.329">
+        app:layout_constraintVertical_bias="0.329"
+        tools:visibility="gone">
 
 
         <Button
@@ -289,8 +290,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
-        tools:visibility="gone">
+        app:layout_constraintVertical_bias="1.0">
 
         <FrameLayout
             android:id="@+id/bottomCardSlider"
@@ -397,7 +397,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat_semibold"
-                android:text="Dirección: La Grieta del Invocador"
+                android:text="Dirección: Facultad de Ingeniería"
                 android:textColor="#333333"
                 android:textSize="18sp"
                 android:textStyle="italic"
@@ -413,7 +413,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat"
-                android:text="2 Servers para Lepe"
+                android:text="2 Lattes"
                 android:textColor="#333333"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -428,12 +428,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat"
-                android:text="1 mimo, 1 baron y 1 perkeo para Kaze"
+                android:text="1 Mochiatto"
                 android:textColor="#333333"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.189"
+                app:layout_constraintHorizontal_bias="0.085"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.685" />
@@ -443,7 +443,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat"
-                android:text="1 ciervo para Calleros"
+                android:text="1 Frappe"
                 android:textColor="#333333"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -458,7 +458,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat"
-                android:text="1 Gótica para Kevlog "
+                android:text="1 Capuccino"
                 android:textColor="#333333"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
