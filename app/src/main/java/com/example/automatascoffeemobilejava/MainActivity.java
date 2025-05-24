@@ -34,6 +34,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentContainerView;
 
+import com.example.automatascoffeemobilejava.data.API;
+import com.example.automatascoffeemobilejava.data.LoginRequest;
+import com.example.automatascoffeemobilejava.data.LoginResponse;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -47,6 +50,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
+
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 //---------------COSAS PENDIENTES---------------
 //Revisar lo del campo de la contraseña, el PASSWORD TRUE me arroja que es deprecated, cehcar eso
@@ -62,32 +70,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //-Inicio-
+        //---INICIO DE LA APLICACIÓN---
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
-        //-Crea la variable de la ubicación
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) return;
-                for (Location location : locationResult.getLocations()) {
-                    double lat = location.getLatitude();
-                    double lng = location.getLongitude();
-                    Log.d("LOCATION", "Lat: " + lat + ", Lng: " + lng);
-                    // Aquí puedes enviar la ubicación a tu servidor o mapa
-                }
-            }
-        };
 
-        //-Metodo de permisos y seguimiento de ubicación-
-        startLocationUpdates();
 
-        //-Inicializar los elementos de la vista
+
+
+
+        //---CARGAR ELEMENTOS DEL DISEÑO---
+
         Button btnLogin = findViewById(R.id.btnLogin);
         EditText txtUser = findViewById(R.id.txtUser);
         EditText txtPassword = findViewById(R.id.txtPassword);
@@ -98,14 +94,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ImageButton bottomCardOpenerCloser = findViewById(R.id.bottomCardOpenerCloser);
         ImageButton topCardOpenerCloser = findViewById(R.id.topCardOpenerCloser);
         ConstraintLayout topCardInfoButtons = findViewById(R.id.topCardInfoButtons);
-
+        ImageButton imageButton2 = findViewById(R.id.imageButton2);
+        ImageButton imageButton3 = findViewById(R.id.imageButton3);
+        ImageButton imageButton5 = findViewById(R.id.imageButton5);
 
         int bottomCardMaximumSize = 375;
         int bottomCardMinimalSize = 135;
 
         float bottomCardmMaximumHeight = dpToPx(this, bottomCardMaximumSize);
         float bottomCardMinimalHeight = dpToPx(this, bottomCardMinimalSize);
-
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         int screenHeight = metrics.heightPixels;
@@ -118,16 +115,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         float bottomCardClosedHeight = screenHeight + notificationBarHeight - bottomCardMinimalHeight;
         float bottomCardOpenedHeight = screenHeight + notificationBarHeight - bottomCardmMaximumHeight;
 
-
         ViewGroup.LayoutParams bottomCardLayoutParams = bottomCard.getLayoutParams();
         bottomCardLayoutParams.height = (int) dpToPx(this, bottomCardMaximumSize);
         ViewGroup.LayoutParams topCardLayoutParams = topCard.getLayoutParams();
         topCardLayoutParams.height = (int) dpToPx(this, 60);
-
-        ImageButton imageButton2 = findViewById(R.id.imageButton2);
-        ImageButton imageButton3 = findViewById(R.id.imageButton3);
-        ImageButton imageButton5 = findViewById(R.id.imageButton5);
-
 
         topCard.setScaleX(0);
         topCard.setScaleY(0);
@@ -138,9 +129,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         bottomCard.setVisibility(View.GONE);
 
 
-        //-Vibrador-
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
+
+
+
+
+        //---ELEMENTOS EXTRAS---
+
+        //-Declarar vibrador-
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         //-Barra de estado transparente-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
@@ -149,8 +146,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             );
             window.setStatusBarColor(Color.TRANSPARENT);
         }
-
-        //Para cargar el mapa
+        //Carga el mapa
         SupportMapFragment mapFragment = (SupportMapFragment)
                 getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
@@ -158,96 +154,190 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
 
-        txtUser.setText("ale");
-        txtPassword.setText("123");
 
 
-        // ----------------------------------------------------------------
 
 
-        //---LOGIN---
-        btnLogin.setOnClickListener(v -> {
 
-            //--VIBRADOR--
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
-            } else {
-                vibrator.vibrate(100); // 100 ms
+        //---UBICACIÓN Y SEGUIMIENTO DE UBICACIÓN---
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) return;
+                for (Location location : locationResult.getLocations()) {
+                    double lat = location.getLatitude();
+                    double lng = location.getLongitude();
+                }
             }
+        };
+        startLocationUpdates();
 
-            String username = txtUser.getText().toString();
-            String password = txtPassword.getText().toString();
 
-            if (username.equals("ale") && password.equals("123")) {
-                loginCard.animate()
-                        .scaleX(1.15f)
-                        .scaleY(1.15f)
-                        .setDuration(100)
-                        .withEndAction(() -> {
+
+
+
+
+        //---BACKEND---
+
+        //Realiza las solicitudes http, usará esa url y la api para el trabajo necesario
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.example.com/")
+                .addConverterFactory(GsonConverterFactory.create()) //Convertidor de JSON a objeto, al enviar y recibir datos
+                .build();
+        API api = retrofit.create(API.class);
+
+
+
+
+
+
+        //---FUNCIONAMIENTO DEL DISEÑO---
+
+        //login
+        btnLogin.setOnClickListener(v -> {
+            LoginRequest loginRequest = new LoginRequest(txtUser.getText().toString(), txtPassword.getText().toString());
+            api.login(loginRequest).enqueue(new retrofit2.Callback<LoginResponse>() {
+                @Override
+                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+
+                    if (response.isSuccessful() && response.body() != null) {
+                        LoginResponse loginResponse = response.body();
+
+                        //El cuerpo es un booleano entonces aquí revisa la condición de este
+                        if(loginResponse.isSuccess()) {
                             loginCard.animate()
-                                    .scaleX(0f)
-                                    .scaleY(0f)
-                                    .setDuration(200)
-                                    .withEndAction(() -> loginCard.setVisibility(View.GONE))
-                                    .start();
-                            opacityCard.animate()
-                                    .alpha(0f)
-                                    .setDuration(200)
-                                    .withEndAction(() -> opacityCard.setVisibility(View.GONE))
+                                    .scaleX(1.15f)
+                                    .scaleY(1.15f)
+                                    .setDuration(100)
                                     .withEndAction(() -> {
-                                        topCard.setVisibility(View.VISIBLE);
-                                        topCard.animate()
-                                                .scaleX(1.1f)
-                                                .scaleY(1.1f)
-                                                .setDuration(100)
+                                        loginCard.animate()
+                                                .scaleX(0f)
+                                                .scaleY(0f)
+                                                .setDuration(200)
+                                                .withEndAction(() -> loginCard.setVisibility(View.GONE))
+                                                .start();
+                                        opacityCard.animate()
+                                                .alpha(0f)
+                                                .setDuration(200)
+                                                .withEndAction(() -> opacityCard.setVisibility(View.GONE))
                                                 .withEndAction(() -> {
+                                                    topCard.setVisibility(View.VISIBLE);
                                                     topCard.animate()
-                                                            .scaleX(1.0f)
-                                                            .scaleY(1.0f)
+                                                            .scaleX(1.1f)
+                                                            .scaleY(1.1f)
                                                             .setDuration(100)
-                                                            .start();
-                                                });
-                                        bottomCard.setVisibility(View.VISIBLE);
-                                        bottomCard.animate()
-                                                .scaleX(1.1f)
-                                                .scaleY(1.1f)
-                                                .setDuration(100)
-                                                .withEndAction(() -> {
+                                                            .withEndAction(() -> {
+                                                                topCard.animate()
+                                                                        .scaleX(1.0f)
+                                                                        .scaleY(1.0f)
+                                                                        .setDuration(100)
+                                                                        .start();
+                                                            });
+                                                    bottomCard.setVisibility(View.VISIBLE);
                                                     bottomCard.animate()
-                                                            .scaleX(1.0f)
-                                                            .scaleY(1.0f)
+                                                            .scaleX(1.1f)
+                                                            .scaleY(1.1f)
                                                             .setDuration(100)
-                                                            .start();
+                                                            .withEndAction(() -> {
+                                                                bottomCard.animate()
+                                                                        .scaleX(1.0f)
+                                                                        .scaleY(1.0f)
+                                                                        .setDuration(100)
+                                                                        .start();
+                                                            });
                                                 });
                                     });
-                        });
-                //Oculta el teclado al hacer click en el botón
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                View view = getCurrentFocus();
-                if (view != null) {
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
-            } else {
-                loginCard.animate()
-                        .translationX(15f)
-                        .setDuration(50)
-                        .withEndAction(() -> {
+                            //Vibra
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
+                            } else {
+                                vibrator.vibrate(100); // 100 ms
+                            }
+                            //Oculta el teclado
+                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                            View view = getCurrentFocus();
+                            if (view != null) {
+                                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                            }
+                        } else {
                             loginCard.animate()
-                                    .translationX(-15f)
+                                    .translationX(15f)
                                     .setDuration(50)
                                     .withEndAction(() -> {
                                         loginCard.animate()
-                                                .translationX(0f)
+                                                .translationX(-15f)
                                                 .setDuration(50)
+                                                .withEndAction(() -> {
+                                                    loginCard.animate()
+                                                            .translationX(0f)
+                                                            .setDuration(50)
+                                                            .start();
+                                                })
                                                 .start();
-                                    })
-                                    .start();
-                        });
-                Toast.makeText(MainActivity.this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
+                                    });
+                            //Vibra
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
+                            } else {
+                                vibrator.vibrate(100); // 100 ms
+                            }
+                        }
+                    } else {
+
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<LoginResponse> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, "Fallo en la conexión", Toast.LENGTH_SHORT).show();
+                }
+
+            });
+        });
+
+        //topCard posición inicial
+        topCard.post(new Runnable() {
+            @Override
+            public void run() {
+                topCard.setY(dpToPx(MainActivity.this, 50));
             }
         });
 
-        //---BOTTOM CARD---
+        //topCard botón para abrir y cerrar
+        topCardOpenerCloser.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        if (topCard.getHeight() == dpToPx(MainActivity.this, 60)) {
+                            ValueAnimator animator = ValueAnimator.ofFloat(dpToPx(MainActivity.this, 60), dpToPx(MainActivity.this, 200));
+                            animator.addUpdateListener(ValueAnimator -> {
+                                ;
+                                float value = (float) animator.getAnimatedValue();
+                                topCardLayoutParams.height = (int) value;
+                                topCard.setLayoutParams(topCardLayoutParams);
+                            });
+                            animator.setDuration(200);
+                            animator.start();
+                        } else {
+                            ValueAnimator animator = ValueAnimator.ofFloat(dpToPx(MainActivity.this, 200), dpToPx(MainActivity.this, 60));
+                            animator.addUpdateListener(ValueAnimator -> {
+                                float value = (float) animator.getAnimatedValue();
+                                topCardLayoutParams.height = (int) value;
+                                topCard.setLayoutParams(topCardLayoutParams);
+                            });
+                            animator.setDuration(200);
+                            animator.start();
+                        }
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        //bottomCard táctil
         bottomCard.setOnTouchListener(new View.OnTouchListener() {
             float dY;
 
@@ -293,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        //---AJUSTA LA POSICIÓN DE LA BOTTOM CARD---
+        //bottomCard posición inicial
         bottomCard.post(new Runnable() {
             @Override
             public void run() {
@@ -301,15 +391,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        //---AJUSTA LA POSICIÓN DE LA TOP CARD---
-        topCard.post(new Runnable() {
-            @Override
-            public void run() {
-                topCard.setY(dpToPx(MainActivity.this, 50));
-            }
-        });
-
-        //---BOTÓN DE LA BOTTOM CARD---
+        //bottomCard botón para abrir y cerrar
         bottomCardOpenerCloser.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -344,40 +426,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        //---BOTÓN DE LA TOP CARD---
-        topCardOpenerCloser.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        if (topCard.getHeight() == dpToPx(MainActivity.this, 60)) {
-                            ValueAnimator animator = ValueAnimator.ofFloat(dpToPx(MainActivity.this, 60), dpToPx(MainActivity.this, 200));
-                            animator.addUpdateListener(ValueAnimator -> {
-                                ;
-                                float value = (float) animator.getAnimatedValue();
-                                topCardLayoutParams.height = (int) value;
-                                topCard.setLayoutParams(topCardLayoutParams);
-                            });
-                            animator.setDuration(200);
-                            animator.start();
-                        } else {
-                            ValueAnimator animator = ValueAnimator.ofFloat(dpToPx(MainActivity.this, 200), dpToPx(MainActivity.this, 60));
-                            animator.addUpdateListener(ValueAnimator -> {
-                                float value = (float) animator.getAnimatedValue();
-                                topCardLayoutParams.height = (int) value;
-                                topCard.setLayoutParams(topCardLayoutParams);
-                            });
-                            animator.setDuration(200);
-                            animator.start();
-                        }
-                    default:
-                        return false;
-                }
-            }
-        });
-
 
     }
+
+
+
+
+
+
 
     //-METODO DE PERMISOS Y SEGUIMIENTO DE UBICACIÓN-
     private void startLocationUpdates() {
