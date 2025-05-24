@@ -2,13 +2,18 @@ package com.example.automatascoffeemobilejava;
 
 import static com.example.automatascoffeemobilejava.utils.DimensionUtils.dpToPx;
 
+import android.Manifest;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.DisplayMetrics;
@@ -25,7 +30,16 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentContainerView;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -38,12 +52,13 @@ import com.google.android.gms.maps.model.Marker;
 //Revisar lo del campo de la contraseña, el PASSWORD TRUE me arroja que es deprecated, cehcar eso
 //PONER SOMBRAS
 
-
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private Marker userMarker;
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
 
+    //-METODO PRINCIPAL-
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +68,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
+        //-Crea la variable de la ubicación
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) return;
+                for (Location location : locationResult.getLocations()) {
+                    double lat = location.getLatitude();
+                    double lng = location.getLongitude();
+                    Log.d("LOCATION", "Lat: " + lat + ", Lng: " + lng);
+                    // Aquí puedes enviar la ubicación a tu servidor o mapa
+                }
+            }
+        };
+
+        //-Metodo de permisos y seguimiento de ubicación-
+        startLocationUpdates();
 
         //-Inicializar los elementos de la vista
         Button btnLogin = findViewById(R.id.btnLogin);
@@ -63,15 +95,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         FrameLayout opacityCard = findViewById(R.id.opacityCard);
         ConstraintLayout topCard = findViewById(R.id.topCard);
         ConstraintLayout bottomCard = findViewById(R.id.bottomCard);
-        ConstraintLayout bottomCardInfo = findViewById(R.id.bottomCardInfo);
-        FragmentContainerView map = findViewById(R.id.map);
         ImageButton bottomCardOpenerCloser = findViewById(R.id.bottomCardOpenerCloser);
+        ImageButton topCardOpenerCloser = findViewById(R.id.topCardOpenerCloser);
+        ConstraintLayout topCardInfoButtons = findViewById(R.id.topCardInfoButtons);
+
 
         int bottomCardMaximumSize = 375;
         int bottomCardMinimalSize = 135;
 
         float bottomCardmMaximumHeight = dpToPx(this, bottomCardMaximumSize);
         float bottomCardMinimalHeight = dpToPx(this, bottomCardMinimalSize);
+
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         int screenHeight = metrics.heightPixels;
@@ -87,6 +121,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         ViewGroup.LayoutParams bottomCardLayoutParams = bottomCard.getLayoutParams();
         bottomCardLayoutParams.height = (int) dpToPx(this, bottomCardMaximumSize);
+        ViewGroup.LayoutParams topCardLayoutParams = topCard.getLayoutParams();
+        topCardLayoutParams.height = (int) dpToPx(this, 60);
+
+        ImageButton imageButton2 = findViewById(R.id.imageButton2);
+        ImageButton imageButton3 = findViewById(R.id.imageButton3);
+        ImageButton imageButton5 = findViewById(R.id.imageButton5);
 
 
         topCard.setScaleX(0);
@@ -98,8 +138,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         bottomCard.setVisibility(View.GONE);
 
 
+        //-Vibrador-
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
 
         //-Barra de estado transparente-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -109,12 +149,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             );
             window.setStatusBarColor(Color.TRANSPARENT);
         }
+
         //Para cargar el mapa
         SupportMapFragment mapFragment = (SupportMapFragment)
                 getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
+
+
+        txtUser.setText("ale");
+        txtPassword.setText("123");
+
+
+        // ----------------------------------------------------------------
 
 
         //---LOGIN---
@@ -181,20 +229,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             } else {
                 loginCard.animate()
-                                .translationX(15f)
-                                .setDuration(50)
-                                .withEndAction(() -> {
-                                    loginCard.animate()
-                                            .translationX(-15f)
-                                            .setDuration(50)
-                                            .withEndAction(() -> {
-                                                loginCard.animate()
-                                                        .translationX(0f)
-                                                        .setDuration(50)
-                                                        .start();
-                                            })
-                                            .start();
-                                });
+                        .translationX(15f)
+                        .setDuration(50)
+                        .withEndAction(() -> {
+                            loginCard.animate()
+                                    .translationX(-15f)
+                                    .setDuration(50)
+                                    .withEndAction(() -> {
+                                        loginCard.animate()
+                                                .translationX(0f)
+                                                .setDuration(50)
+                                                .start();
+                                    })
+                                    .start();
+                        });
                 Toast.makeText(MainActivity.this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
             }
         });
@@ -245,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        //---AJUSTA EL TAMAÑO DE LA BOTTOM CARD---
+        //---AJUSTA LA POSICIÓN DE LA BOTTOM CARD---
         bottomCard.post(new Runnable() {
             @Override
             public void run() {
@@ -253,11 +301,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        //---AJUSTA LA POSICIÓN DE LA TOP CARD---
+        topCard.post(new Runnable() {
+            @Override
+            public void run() {
+                topCard.setY(dpToPx(MainActivity.this, 50));
+            }
+        });
+
         //---BOTÓN DE LA BOTTOM CARD---
         bottomCardOpenerCloser.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
-            public boolean onTouch(View v, MotionEvent event){
+            public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         if (bottomCard.getY() + 10 > bottomCardClosedHeight) {
@@ -287,15 +343,62 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         });
+
+        //---BOTÓN DE LA TOP CARD---
+        topCardOpenerCloser.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        if (topCard.getHeight() == dpToPx(MainActivity.this, 60)) {
+                            ValueAnimator animator = ValueAnimator.ofFloat(dpToPx(MainActivity.this, 60), dpToPx(MainActivity.this, 200));
+                            animator.addUpdateListener(ValueAnimator -> {
+                                ;
+                                float value = (float) animator.getAnimatedValue();
+                                topCardLayoutParams.height = (int) value;
+                                topCard.setLayoutParams(topCardLayoutParams);
+                            });
+                            animator.setDuration(200);
+                            animator.start();
+                        } else {
+                            ValueAnimator animator = ValueAnimator.ofFloat(dpToPx(MainActivity.this, 200), dpToPx(MainActivity.this, 60));
+                            animator.addUpdateListener(ValueAnimator -> {
+                                float value = (float) animator.getAnimatedValue();
+                                topCardLayoutParams.height = (int) value;
+                                topCard.setLayoutParams(topCardLayoutParams);
+                            });
+                            animator.setDuration(200);
+                            animator.start();
+                        }
+                    default:
+                        return false;
+                }
+            }
+        });
+
+
     }
 
+    //-METODO DE PERMISOS Y SEGUIMIENTO DE UBICACIÓN-
+    private void startLocationUpdates() {
+        //-API DE LA UBICACIÓN MODERNA-
+        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
+                .build();
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
 
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+    }
+
+    //-CARACTERÍSTICAS DEL MAPA (PUNTO DE INICIO, PUNTO DE UBICACIÓN, ESTILO)-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        //MODO OSCURO DEL MAPA
+        //-Modo oscuro en el mapa-
         try {
             boolean success = mMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(this, R.raw.map_light_brown_style)
@@ -307,9 +410,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.e("MAPA", "Archivo de estilo no encontrado", e);
         }
 
+        //-Muestra el puntito azul en el mapa-
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            googleMap.setMyLocationEnabled(true);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+
+        //-Desactiva el botón de ubicación-
+        googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+
+        //-Posición inicial-
         LatLng coordenadas = new LatLng(25.814700, -108.979991);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordenadas, 15));
     }
-
 
 }

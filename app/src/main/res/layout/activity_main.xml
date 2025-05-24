@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:background="#CECECE">
 
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -14,115 +15,16 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/topCard"
-        android:layout_width="400dp"
-        android:layout_height="60dp"
-        android:background="@drawable/bg_topcard"
-        android:padding="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias=".5"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.06"
-        tools:visibility="gone">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout"
-            android:layout_width="225dp"
-            android:layout_height="0dp"
-            android:background="@drawable/bg_bottomcard_elements"
-            android:padding="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/constraintLayout3"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/constraintLayout2"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5">
-
-            <TextView
-                android:id="@+id/textView4"
-                android:layout_width="232dp"
-                android:layout_height="28dp"
-                android:fontFamily="@font/montserrat_semibold"
-                android:text="Información adicional"
-                android:textAlignment="center"
-                android:textColor="#333333"
-                android:textSize="18sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout2"
-            android:layout_width="70dp"
-            android:layout_height="0dp"
-            android:background="@drawable/bg_bottomcard_elements"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5">
-
-            <ImageButton
-                android:id="@+id/imageButton"
-                android:layout_width="53dp"
-                android:layout_height="28dp"
-                android:backgroundTint="#00FFFFFF"
-                android:scaleType="centerCrop"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5"
-                app:srcCompat="@drawable/menuicon" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout3"
-            android:layout_width="70dp"
-            android:layout_height="0dp"
-            android:background="@drawable/bg_bottomcard_elements"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.5">
-
-            <ImageButton
-                android:id="@+id/imageButton"
-                android:layout_width="85dp"
-                android:layout_height="53dp"
-                android:backgroundTint="#00FFFFFF"
-                android:scaleType="centerCrop"
-                android:tint="#00BCD4"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5"
-                app:srcCompat="@drawable/ic_launcher_foreground" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintVertical_bias="0.0" />
 
     <FrameLayout
         android:id="@+id/opacityCard"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#80262626"
+        android:background="#9C181818"
         tools:visibility="gone" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -162,12 +64,12 @@
             android:text="INICIO DE SESIÓN"
             android:textColor="#333333"
             android:textSize="24sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/frameLayout3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.509"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.299" />
+            app:layout_constraintTop_toBottomOf="@+id/frameLayout2"
+            app:layout_constraintVertical_bias="0.5" />
 
         <TextView
             android:id="@+id/textView2"
@@ -253,6 +155,7 @@
             app:srcCompat="@drawable/logo" />
 
         <FrameLayout
+            android:id="@+id/frameLayout2"
             android:layout_width="250dp"
             android:layout_height="2dp"
             android:background="#333333"
@@ -266,6 +169,7 @@
         </FrameLayout>
 
         <FrameLayout
+            android:id="@+id/frameLayout3"
             android:layout_width="250dp"
             android:layout_height="2dp"
             android:background="#333333"
@@ -276,6 +180,210 @@
             app:layout_constraintVertical_bias="0.378">
 
         </FrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/topCard"
+        android:layout_width="375dp"
+        android:layout_height="200dp"
+        android:background="@drawable/bg_topcard"
+        android:padding="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.506"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/topCardUser"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_bottomcard_elements"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                android:id="@+id/imageButton4"
+                android:layout_width="59dp"
+                android:layout_height="53dp"
+                android:background="#00FFFFFF"
+                android:backgroundTint="#B4B4B4"
+                android:scaleType="centerCrop"
+                android:tint="#FF5100"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5"
+                app:srcCompat="@drawable/ic_launcher_foreground" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/topCardPedidos"
+            android:layout_width="300dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_bottomcard_elements"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                android:id="@+id/topCardOpenerCloser"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:backgroundTint="#00FFFFFF"
+                android:scaleType="centerCrop"
+                android:tint="#262626"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5"
+                app:srcCompat="@drawable/menuicon" />
+
+            <FrameLayout
+                android:layout_width="2dp"
+                android:layout_height="25dp"
+                android:background="#333333"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/textView15"
+                app:layout_constraintHorizontal_bias="0.4"
+                app:layout_constraintStart_toEndOf="@+id/topCardOpenerCloser"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5">
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/textView15"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat_semibold"
+                android:text="Mostrar pedidos (5)"
+                android:textAlignment="center"
+                android:textColor="#333333"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/topCardInfo"
+            android:layout_width="300dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_bottomcard_elements"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/topCardUser"
+            app:layout_constraintVertical_bias="0.5">
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat_semibold"
+                android:text="2.- Pedido para Milkwas"
+                android:textAlignment="center"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toTopOf="@+id/textView17"
+                app:layout_constraintTop_toBottomOf="@+id/textView16"
+                app:layout_constraintVertical_bias="0.5"
+                tools:layout_editor_absoluteX="16dp" />
+
+            <TextView
+                android:id="@+id/textView17"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat_semibold"
+                android:text="3.- Pedido #34123"
+                android:textAlignment="center"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView4"
+                app:layout_constraintVertical_bias="0.5"
+                tools:layout_editor_absoluteX="16dp" />
+
+            <TextView
+                android:id="@+id/textView16"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat_semibold"
+                android:text="1.- Especial para Automatas Software"
+                android:textAlignment="center"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toTopOf="@+id/textView4"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5"
+                tools:layout_editor_absoluteX="16dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/topCardInfoButtons"
+            android:layout_width="40dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_bottomcard_elements"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/topCardInfo"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/topCardUser"
+            app:layout_constraintVertical_bias="0.5">
+
+            <ImageButton
+                android:id="@+id/imageButton2"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:backgroundTint="#00FFFFFF"
+                android:tint="#333333"
+                app:layout_constraintBottom_toTopOf="@+id/imageButton3"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5"
+                app:srcCompat="@android:drawable/ic_menu_send" />
+
+            <ImageButton
+                android:id="@+id/imageButton3"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:backgroundTint="#00FFFFFF"
+                android:tint="#FF5100"
+                app:layout_constraintBottom_toTopOf="@+id/imageButton5"
+                app:layout_constraintTop_toBottomOf="@+id/imageButton2"
+                app:layout_constraintVertical_bias="0.5"
+                app:srcCompat="@android:drawable/ic_menu_send"
+                tools:layout_editor_absoluteX="0dp" />
+
+            <ImageButton
+                android:id="@+id/imageButton5"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:backgroundTint="#00FFFFFF"
+                android:tint="#FF5100"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageButton3"
+                app:layout_constraintVertical_bias="0.5"
+                app:srcCompat="@android:drawable/ic_menu_send"
+                tools:layout_editor_absoluteX="0dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

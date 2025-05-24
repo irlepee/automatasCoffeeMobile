@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-
 }
 
 android {
@@ -38,6 +37,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
+    implementation(libs.retrofit)
+    implementation(libs.gson)
+    implementation(libs.retrofit.gson)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
