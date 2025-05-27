@@ -5,11 +5,14 @@ import static com.example.automatascoffeemobilejava.utils.DimensionUtils.dpToPx;
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.RenderEffect;
+import android.graphics.Shader;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -97,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ImageButton imageButton2 = findViewById(R.id.imageButton2);
         ImageButton imageButton3 = findViewById(R.id.imageButton3);
         ImageButton imageButton5 = findViewById(R.id.imageButton5);
+        ImageButton topCardUserButton = findViewById(R.id.topCardUserButton);
 
         int bottomCardMaximumSize = 375;
         int bottomCardMinimalSize = 135;
@@ -159,6 +163,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
+
+
+
+
         //---UBICACIÓN Y SEGUIMIENTO DE UBICACIÓN---
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -183,14 +191,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //Realiza las solicitudes http, usará esa url y la api para el trabajo necesario
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://192.168.100.214/")
+                .baseUrl("http://192.168.100.214:8000/")
                 .addConverterFactory(GsonConverterFactory.create()) //Convertidor de JSON a objeto, al enviar y recibir datos
                 .build();
         API api = retrofit.create(API.class);
 
+        txtUser.setText("alex075");
+        txtPassword.setText("Evolve075_");
 
-
-
+        //Obtener todos los pedidos referentes al repartidor
 
 
         //---FUNCIONAMIENTO DEL DISEÑO---
@@ -207,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         //El cuerpo es un booleano entonces aquí revisa la condición de este
                         if(loginResponse.isSuccess()) {
+                            mMap.getUiSettings().setAllGesturesEnabled(true);
                             loginCard.animate()
                                     .scaleX(1.15f)
                                     .scaleY(1.15f)
@@ -291,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 @Override
                 public void onFailure(Call<LoginResponse> call, Throwable t) {
-                    Toast.makeText(MainActivity.this, "Fallo en la conexión", Toast.LENGTH_SHORT).show();
+                    Log.e("Login", "Error al conectar: ", t);
                 }
 
             });
@@ -426,7 +436,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        //userCard botón para abrirlo
+        topCardUserButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
 
+                    default:
+                        return false;
+                }
+            }
+        });
     }
 
 
@@ -453,6 +474,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        mMap.getUiSettings().setAllGesturesEnabled(false);
 
         //-Modo oscuro en el mapa-
         try {

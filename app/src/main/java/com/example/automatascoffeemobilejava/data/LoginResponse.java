@@ -1,14 +1,16 @@
 package com.example.automatascoffeemobilejava.data;
 
 public class LoginResponse {
+
+    String status;
     boolean success;
-    String response;
 
     public boolean isSuccess() {
         return success;
     }
 
-    public String getResponse() {
-        return response;
+    public String getStatus() {
+        return status;
     }
+
 }
