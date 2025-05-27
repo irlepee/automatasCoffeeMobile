@@ -15,7 +15,7 @@ import retrofit2.http.POST;
 //request es el objeto de tipo LoginRequest que se va a enviar a la API
 
 public interface API {
-    @POST("login")
+    @POST("api/mobile/login")
     Call<LoginResponse> login(@Body LoginRequest request);
 
 }

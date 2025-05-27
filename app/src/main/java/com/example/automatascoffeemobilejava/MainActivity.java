@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //Realiza las solicitudes http, usará esa url y la api para el trabajo necesario
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.example.com/")
+                .baseUrl("https://192.168.100.214/")
                 .addConverterFactory(GsonConverterFactory.create()) //Convertidor de JSON a objeto, al enviar y recibir datos
                 .build();
         API api = retrofit.create(API.class);
