@@ -103,6 +103,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ImageButton topCardUserButton = findViewById(R.id.topCardUserButton);
         ConstraintLayout infoCard = findViewById(R.id.infoCard);
         Button infoCardCloser = findViewById(R.id.infoCardCloser);
+        ConstraintLayout completeCard = findViewById(R.id.completeCard);
+        Button completeButton = findViewById(R.id.completeButton);
+        Button cancelButton = findViewById(R.id.cancelButton);
+        Button completeCardButton = findViewById(R.id.completeCardButton);
 
         int bottomCardMaximumSize = 375;
         int bottomCardMinimalSize = 135;
@@ -136,7 +140,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         infoCard.setScaleY(0);
         infoCard.setScaleX(0);
         infoCard.setVisibility(View.GONE);
-
+        completeCard.setScaleY(0);
+        completeCard.setScaleX(0);
+        completeCard.setVisibility(View.GONE);
+        opacityCard.setClickable(true);
 
 
 
@@ -221,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         //El cuerpo es un booleano entonces aquí revisa la condición de este
                         if(loginResponse.isSuccess()) {
-                            mMap.getUiSettings().setAllGesturesEnabled(true);
+                            opacityCard.setClickable(false);
                             loginCard.animate()
                                     .scaleX(1.15f)
                                     .scaleY(1.15f)
@@ -449,6 +456,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     case MotionEvent.ACTION_DOWN:
                         infoCard.setVisibility(View.VISIBLE);
                         opacityCard.setVisibility(View.VISIBLE);
+                        opacityCard.setClickable(true);
                         opacityCard.animate()
                                 .alpha(1f)
                                 .setDuration(200)
@@ -474,6 +482,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
+                        opacityCard.setClickable(false);
                         opacityCard.animate()
                                 .alpha(0f)
                                 .setDuration(200)
@@ -489,6 +498,81 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         });
+
+        completeCardButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        completeCard.setVisibility(View.VISIBLE);
+                        opacityCard.setVisibility(View.VISIBLE);
+                        opacityCard.setClickable(true);
+                        opacityCard.animate()
+                                .alpha(1f)
+                                .setDuration(200)
+                                .start();
+                        completeCard.animate()
+                                .scaleY(1.05f)
+                                .scaleX(1.05f)
+                                .setDuration(150)
+                                .withEndAction(
+                                        () -> completeCard.animate()
+                                                .scaleY(1f)
+                                                .scaleX(1f)
+                                                .setDuration(150)
+                                                .start());
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        cancelButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        opacityCard.setClickable(false);
+                        opacityCard.animate()
+                                .alpha(0f)
+                                .setDuration(200)
+                                .withEndAction(() -> opacityCard.setVisibility(View.GONE));
+                        completeCard.animate()
+                                .scaleY(0f)
+                                .scaleX(0f)
+                                .setDuration(150)
+                                .withEndAction(() -> completeCard.setVisibility(View.GONE));
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        completeButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Aquí puedes agregar la lógica para completar el pedido
+                        Toast.makeText(MainActivity.this, "Pedido completado", Toast.LENGTH_SHORT).show();
+                        opacityCard.setClickable(false);
+                        opacityCard.animate()
+                                .alpha(0f)
+                                .setDuration(200)
+                                .withEndAction(() -> opacityCard.setVisibility(View.GONE));
+                        completeCard.animate()
+                                .scaleY(0f)
+                                .scaleX(0f)
+                                .setDuration(150)
+                                .withEndAction(() -> completeCard.setVisibility(View.GONE));
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+
     }
 
 
@@ -515,8 +599,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        mMap.getUiSettings().setAllGesturesEnabled(false);
 
         //-Modo oscuro en el mapa-
         try {
