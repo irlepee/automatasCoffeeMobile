@@ -101,6 +101,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ImageButton imageButton3 = findViewById(R.id.imageButton3);
         ImageButton imageButton5 = findViewById(R.id.imageButton5);
         ImageButton topCardUserButton = findViewById(R.id.topCardUserButton);
+        ConstraintLayout infoCard = findViewById(R.id.infoCard);
+        Button infoCardCloser = findViewById(R.id.infoCardCloser);
 
         int bottomCardMaximumSize = 375;
         int bottomCardMinimalSize = 135;
@@ -131,6 +133,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         bottomCard.setScaleY(0);
         bottomCard.setTranslationY(bottomCardMinimalHeight);
         bottomCard.setVisibility(View.GONE);
+        infoCard.setScaleY(0);
+        infoCard.setScaleX(0);
+        infoCard.setVisibility(View.GONE);
 
 
 
@@ -442,7 +447,43 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
+                        infoCard.setVisibility(View.VISIBLE);
+                        opacityCard.setVisibility(View.VISIBLE);
+                        opacityCard.animate()
+                                .alpha(1f)
+                                .setDuration(200)
+                                .start();
+                        infoCard.animate()
+                                .scaleY(1.05f)
+                                .scaleX(1.05f)
+                                .setDuration(150)
+                                .withEndAction(
+                                        () -> infoCard.animate()
+                                                .scaleY(1f)
+                                                .scaleX(1f)
+                                                .setDuration(150)
+                                                .start());
+                    default:
+                        return false;
+                }
+            }
+        });
 
+        infoCardCloser.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        opacityCard.animate()
+                                .alpha(0f)
+                                .setDuration(200)
+                                .withEndAction(() -> opacityCard.setVisibility(View.GONE));
+                        infoCard.animate()
+                                .scaleY(0f)
+                                .scaleX(0f)
+                                .setDuration(150)
+                                .withEndAction(() -> infoCard.setVisibility(View.GONE));
+                        return true;
                     default:
                         return false;
                 }
