@@ -1,11 +1,10 @@
 package com.example.automatascoffeemobilejava.data;
 
-
 import com.example.automatascoffeemobilejava.data.requests.DataRequest;
-import com.example.automatascoffeemobilejava.data.requests.DeliveryRequest;
 import com.example.automatascoffeemobilejava.data.requests.LoginRequest;
 import com.example.automatascoffeemobilejava.data.responses.DataResponse;
 import com.example.automatascoffeemobilejava.data.responses.DeliveryResponse;
+import com.example.automatascoffeemobilejava.data.responses.DetailsResponse;
 import com.example.automatascoffeemobilejava.data.responses.LoginResponse;
 
 import retrofit2.Call;
@@ -24,6 +23,6 @@ public interface API {
     @GET("api/purchase/delivery")
     Call<DeliveryResponse> pedidos(@Query("id") int id, @Query("max") int max);
 
-
-
+    @GET("api/mobile/details")
+    Call<DetailsResponse> getDetails(@Query("id") int idCompra);
 }

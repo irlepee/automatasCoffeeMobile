@@ -193,12 +193,12 @@
             app:layout_constraintVertical_bias="0.5">
 
             <ImageButton
-                android:id="@+id/imageButton2"
+                android:id="@+id/pedidoButton1"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:backgroundTint="#00FFFFFF"
-                android:tint="#333333"
-                app:layout_constraintBottom_toTopOf="@+id/imageButton3"
+                android:tint="#FF5100"
+                app:layout_constraintBottom_toTopOf="@+id/pedidoButton2"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
@@ -207,21 +207,21 @@
                 app:srcCompat="@android:drawable/ic_menu_send" />
 
             <ImageButton
-                android:id="@+id/imageButton3"
+                android:id="@+id/pedidoButton2"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:backgroundTint="#00FFFFFF"
                 android:tint="#FF5100"
-                app:layout_constraintBottom_toTopOf="@+id/imageButton5"
+                app:layout_constraintBottom_toTopOf="@+id/pedidoButton3"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageButton2"
+                app:layout_constraintTop_toBottomOf="@+id/pedidoButton1"
                 app:layout_constraintVertical_bias="0.5"
                 app:srcCompat="@android:drawable/ic_menu_send" />
 
             <ImageButton
-                android:id="@+id/imageButton5"
+                android:id="@+id/pedidoButton3"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:backgroundTint="#00FFFFFF"
@@ -230,7 +230,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageButton3"
+                app:layout_constraintTop_toBottomOf="@+id/pedidoButton2"
                 app:layout_constraintVertical_bias="0.5"
                 app:srcCompat="@android:drawable/ic_menu_send" />
         </androidx.constraintlayout.widget.ConstraintLayout>

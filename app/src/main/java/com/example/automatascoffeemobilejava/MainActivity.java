@@ -35,10 +35,10 @@ import androidx.core.app.ActivityCompat;
 
 import com.example.automatascoffeemobilejava.data.API;
 import com.example.automatascoffeemobilejava.data.requests.DataRequest;
-import com.example.automatascoffeemobilejava.data.requests.DeliveryRequest;
 import com.example.automatascoffeemobilejava.data.requests.LoginRequest;
 import com.example.automatascoffeemobilejava.data.responses.DataResponse;
 import com.example.automatascoffeemobilejava.data.responses.DeliveryResponse;
+import com.example.automatascoffeemobilejava.data.responses.DetailsResponse;
 import com.example.automatascoffeemobilejava.data.responses.LoginResponse;
 import com.example.automatascoffeemobilejava.model.Repartidor;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -53,8 +53,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
-
-import org.w3c.dom.Text;
+import com.google.gson.Gson;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -94,9 +93,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ImageButton bottomCardOpenerCloser = findViewById(R.id.bottomCardOpenerCloser);
         ImageButton topCardOpenerCloser = findViewById(R.id.topCardOpenerCloser);
         ConstraintLayout topCardInfoButtons = findViewById(R.id.topCardInfoButtons);
-        ImageButton imageButton2 = findViewById(R.id.imageButton2);
-        ImageButton imageButton3 = findViewById(R.id.imageButton3);
-        ImageButton imageButton5 = findViewById(R.id.imageButton5);
+        ImageButton imageButton2 = findViewById(R.id.pedidoButton1);
+        ImageButton imageButton3 = findViewById(R.id.pedidoButton2);
+        ImageButton imageButton5 = findViewById(R.id.pedidoButton3);
         ImageButton topCardUserButton = findViewById(R.id.topCardUserButton);
         ConstraintLayout infoCard = findViewById(R.id.infoCard);
         Button infoCardCloser = findViewById(R.id.infoCardCloser);
@@ -621,6 +620,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         TextView txtPedido1 = findViewById(R.id.txtPedido1);
         TextView txtPedido2 = findViewById(R.id.txtPedido2);
         TextView txtPedido3 = findViewById(R.id.txtPedido3);
+        ImageButton pedidoButton1 = findViewById(R.id.pedidoButton1);
+        ImageButton pedidoButton2 = findViewById(R.id.pedidoButton2);
+        ImageButton pedidoButton3 = findViewById(R.id.pedidoButton3);
 
         // OBTENCIÓN DE DATOS DEL REPARTIDOR
         DataRequest dataRequest = new DataRequest(id);
@@ -647,16 +649,61 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             Log.d("URL", call.request().url().toString()); // Imprime la URL antes de procesar la respuesta
 
                             if (response.isSuccessful() && response.body() != null) {
+                                pedidoButton1.setOnClickListener(v -> {
+                                    resetButtonColors();
+                                    pedidoButton1.setColorFilter(Color.GRAY);
+                                    String text = txtPedido1.getText().toString();
+                                    int id_pedido = extractIdFromText(text);
+                                    realizarConsulta(api, id_pedido);
+                                });
+
+                                pedidoButton2.setOnClickListener(v -> {
+                                    resetButtonColors();
+                                    pedidoButton2.setColorFilter(Color.GRAY);
+                                    String text = txtPedido2.getText().toString();
+                                    int id_pedido = extractIdFromText(text);
+                                    realizarConsulta(api, id_pedido);
+                                });
+
+                                pedidoButton3.setOnClickListener(v -> {
+                                    resetButtonColors();
+                                    pedidoButton3.setColorFilter(Color.GRAY);
+                                    String text = txtPedido3.getText().toString();
+                                    int id_pedido = extractIdFromText(text);
+                                    realizarConsulta(api, id_pedido);
+                                });
+
+
                                 DeliveryResponse deliveryResponse = response.body();
                                 String status = deliveryResponse.getStatus();
                                 String[] deliveries = deliveryResponse.getDeliveries();
 
-                                txtPedido1.setText("Pedido con id: " + (deliveries.length > 0 ? deliveries[0] : "No hay pedidos"));
-                                txtPedido2.setText("Pedido con id: " + (deliveries.length > 1 ? deliveries[1] : "No hay pedidos"));
-                                txtPedido3.setText("Pedido con id: " + (deliveries.length > 2 ? deliveries[2] : "No hay pedidos"));
+                                if (deliveries != null && deliveries.length > 0) {
+                                    txtPedido1.setText(deliveries.length > 0 ? "Pedido con ID: " + deliveries[0] : "");
+                                    txtPedido2.setText(deliveries.length > 1 ? "Pedido con ID: " + deliveries[1] : "");
+                                    txtPedido3.setText(deliveries.length > 2 ? "Pedido con ID: " + deliveries[2] : "");
+
+                                    pedidoButton1.setVisibility(deliveries.length > 0 ? View.VISIBLE : View.INVISIBLE);
+                                    pedidoButton2.setVisibility(deliveries.length > 1 ? View.VISIBLE : View.INVISIBLE);
+                                    pedidoButton3.setVisibility(deliveries.length > 2 ? View.VISIBLE : View.INVISIBLE);
+                                } else {
+                                    txtPedido1.setText("No hay pedidos disponibles");
+                                    txtPedido2.setText("");
+                                    txtPedido3.setText("");
+
+                                    pedidoButton1.setVisibility(View.INVISIBLE);
+                                    pedidoButton2.setVisibility(View.INVISIBLE);
+                                    pedidoButton3.setVisibility(View.INVISIBLE);
+                                }
                             } else {
                                 Toast.makeText(MainActivity.this, "Error al obtener los pedidos", Toast.LENGTH_SHORT).show();
                             }
+                        }
+
+                        private void resetButtonColors() {
+                            pedidoButton1.setColorFilter(Color.parseColor("#ff5100"));
+                            pedidoButton2.setColorFilter(Color.parseColor("#ff5100"));
+                            pedidoButton3.setColorFilter(Color.parseColor("#ff5100"));
                         }
 
 
@@ -679,10 +726,90 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(MainActivity.this, "Error al conectarse con el servidor", Toast.LENGTH_SHORT).show();
             }
         });
+
+        pedidoButton1.setOnClickListener(v -> {
+            String text = txtPedido1.getText().toString();
+            int id_pedido = extractIdFromText(text);
+            realizarConsulta(api, id_pedido);
+        });
+
+        pedidoButton2.setOnClickListener(v -> {
+            String text = txtPedido2.getText().toString();
+            int id_pedido = extractIdFromText(text);
+            realizarConsulta(api, id_pedido);
+        });
+
+        pedidoButton3.setOnClickListener(v -> {
+            String text = txtPedido3.getText().toString();
+            int id_pedido = extractIdFromText(text);
+            realizarConsulta(api, id_pedido);
+        });
+
+    }
+
+    private int extractIdFromText(String text) {
+        String[] parts = text.split(": ");
+        return parts.length > 1 ? Integer.parseInt(parts[1].trim()) : -1;
     }
 
 
+    private void realizarConsulta(API api, int id_pedido) {
+        Call<DetailsResponse> call = api.getDetails(id_pedido);
+        Log.d("API_URL", call.request().url().toString()); // Imprime la URL antes de ejecutar la llamada
 
+        call.enqueue(new retrofit2.Callback<DetailsResponse>() {
+            @Override
+            public void onResponse(Call<DetailsResponse> call, Response<DetailsResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Log.d("JSON_RESPONSE", new Gson().toJson(response.body()));
 
+                    DetailsResponse details = response.body();
+                    if (details.getPurchase() != null) {
+                        String usuario = details.getPurchase().getUsuario();
+                        String repartidor = details.getPurchase().getRepartidor();
+                        String latitud = details.getPurchase().getLatitud();
+                        String longitud = details.getPurchase().getLongitud();
+                        String total = details.getPurchase().getTotal();
+                        String estatus = details.getPurchase().getEstatus();
+                        int idTarjeta = details.getPurchase().getIdTarjeta();
+
+                        String tamano = details.getDetails().isEmpty() || details.getDetails().get(0).getTamaño() == null
+                                ? "N/A"
+                                : details.getDetails().get(0).getTamaño().getNombre();
+
+                        String producto = details.getDetails().isEmpty() || details.getDetails().get(0).getProducto() == null
+                                ? "N/A"
+                                : details.getDetails().get(0).getProducto().getNombre();
+
+                        Toast.makeText(MainActivity.this,
+                                "Usuario: " + usuario +
+                                        ", Total: " + total +
+                                        ", Estatus: " + estatus +
+                                        ", Repartidor: " + repartidor +
+                                        ", Latitud: " + latitud +
+                                        ", Longitud: " + longitud +
+                                        ", Tamaño: " + tamano +
+                                        ", Producto: " + producto +
+                                        ", ID Tarjeta: " + idTarjeta,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    try {
+                        Log.e("JSON_ERROR", response.errorBody().string());
+                    } catch (Exception e) {
+                        Log.e("JSON_ERROR", "Error al leer el cuerpo de la respuesta", e);
+                    }
+                    Toast.makeText(MainActivity.this, "Error en la consulta", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DetailsResponse> call, Throwable t) {
+                Log.e("API_FAILURE", "Error al conectarse con el servidor: " + t.getMessage());
+                Toast.makeText(MainActivity.this, "Error al conectarse con el servidor", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
 
 }
