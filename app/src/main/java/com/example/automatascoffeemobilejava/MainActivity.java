@@ -35,8 +35,10 @@ import androidx.core.app.ActivityCompat;
 
 import com.example.automatascoffeemobilejava.data.API;
 import com.example.automatascoffeemobilejava.data.requests.DataRequest;
+import com.example.automatascoffeemobilejava.data.requests.DeliveryRequest;
 import com.example.automatascoffeemobilejava.data.requests.LoginRequest;
 import com.example.automatascoffeemobilejava.data.responses.DataResponse;
+import com.example.automatascoffeemobilejava.data.responses.DeliveryResponse;
 import com.example.automatascoffeemobilejava.data.responses.LoginResponse;
 import com.example.automatascoffeemobilejava.model.Repartidor;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -51,6 +53,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+
+import org.w3c.dom.Text;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -186,6 +190,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         txtUser.setText("alex075");
         txtPassword.setText("Evolve075_");
+
+
 
 
         //---FUNCIONAMIENTO DEL DISEÑO---
@@ -607,6 +613,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void logueado(API api, int id) {
+        TextView txtNombre = findViewById(R.id.txtNombre);
+        TextView txtTelefono = findViewById(R.id.txtTelefono);
+        TextView txtCurp = findViewById(R.id.txtCURP);
+        TextView txtSangre = findViewById(R.id.txtSangre);
+        TextView txtVigencia = findViewById(R.id.txtVigencia);
+        TextView txtPedido1 = findViewById(R.id.txtPedido1);
+        TextView txtPedido2 = findViewById(R.id.txtPedido2);
+        TextView txtPedido3 = findViewById(R.id.txtPedido3);
+
         // OBTENCIÓN DE DATOS DEL REPARTIDOR
         DataRequest dataRequest = new DataRequest(id);
         api.data(dataRequest).enqueue(new retrofit2.Callback<DataResponse>() {
@@ -616,12 +631,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     DataResponse dataResponse = response.body();
                     Repartidor data = dataResponse.getData();
 
-                    TextView txtNombre = findViewById(R.id.txtNombre);
-                    TextView txtTelefono = findViewById(R.id.txtTelefono);
-                    TextView txtCurp = findViewById(R.id.txtCURP);
-                    TextView txtSangre = findViewById(R.id.txtSangre);
-                    TextView txtVigencia = findViewById(R.id.txtVigencia);
-
                     // Asignación de datos a los TextViews
                     txtNombre.setText(data.getNombre() + " " + data.getApellido1() + " " + data.getApellido2());
                     txtTelefono.setText(data.getTelefono());
@@ -629,21 +638,49 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     txtSangre.setText(data.getTipo_sangre());
                     txtVigencia.setText(data.getVigencia_licencia());
 
+                    int id_repartidor = data.getId();
+
+                    // OBTENCIÓN DE PEDIDOS después de obtener los datos del repartidor
+                    api.pedidos(id_repartidor, 3).enqueue(new retrofit2.Callback<DeliveryResponse>() {
+                        @Override
+                        public void onResponse(Call<DeliveryResponse> call, Response<DeliveryResponse> response) {
+                            Log.d("URL", call.request().url().toString()); // Imprime la URL antes de procesar la respuesta
+
+                            if (response.isSuccessful() && response.body() != null) {
+                                DeliveryResponse deliveryResponse = response.body();
+                                String status = deliveryResponse.getStatus();
+                                String[] deliveries = deliveryResponse.getDeliveries();
+
+                                txtPedido1.setText("Pedido con id: " + (deliveries.length > 0 ? deliveries[0] : "No hay pedidos"));
+                                txtPedido2.setText("Pedido con id: " + (deliveries.length > 1 ? deliveries[1] : "No hay pedidos"));
+                                txtPedido3.setText("Pedido con id: " + (deliveries.length > 2 ? deliveries[2] : "No hay pedidos"));
+                            } else {
+                                Toast.makeText(MainActivity.this, "Error al obtener los pedidos", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+
+                        @Override
+                        public void onFailure(Call<DeliveryResponse> call, Throwable t) {
+                            Log.d("URL", call.request().url().toString()); // Imprime la URL incluso en caso de fallo
+                            Log.e("PEDIDOS", "Error al conectarse con el servidor: " + t.getMessage());
+                            Toast.makeText(MainActivity.this, "Error al conectarse con el servidor", Toast.LENGTH_SHORT).show();
+                        }
+                    });
 
                 } else {
-                    // Manejo de error en caso de respuesta no exitosa
                     Toast.makeText(MainActivity.this, "Error en la respuesta del servidor", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<DataResponse> call, Throwable t) {
-                // Manejo de error en caso de fallo de conexión
                 Log.e("DATA", "Error al conectarse con el servidor: " + t.getMessage());
                 Toast.makeText(MainActivity.this, "Error al conectarse con el servidor", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 
 
 
