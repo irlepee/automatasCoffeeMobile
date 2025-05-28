@@ -248,8 +248,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
-        tools:visibility="gone">
+        app:layout_constraintVertical_bias="1.0">
 
         <FrameLayout
             android:id="@+id/bottomCardSlider"
@@ -278,7 +277,7 @@
             app:layout_constraintVertical_bias="0.5">
 
             <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/txtDistancia"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat_bold"
@@ -307,7 +306,7 @@
             app:layout_constraintVertical_bias="0.5">
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/txtTiempo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat_bold"
@@ -337,7 +336,7 @@
             app:layout_constraintVertical_bias="0.5">
 
             <TextView
-                android:id="@+id/textView8"
+                android:id="@+id/txtPedidoPara"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat_semibold"
@@ -352,7 +351,7 @@
                 app:layout_constraintVertical_bias="0.038" />
 
             <TextView
-                android:id="@+id/textView14"
+                android:id="@+id/txtDireccion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat_semibold"
@@ -368,52 +367,7 @@
                 app:layout_constraintVertical_bias="0.911" />
 
             <TextView
-                android:id="@+id/textView12"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/montserrat"
-                android:text="2 Lattes"
-                android:textColor="#333333"
-                android:textSize="18sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.076"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.419" />
-
-            <TextView
-                android:id="@+id/textView11"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/montserrat"
-                android:text="1 Mochiatto"
-                android:textColor="#333333"
-                android:textSize="18sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.085"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.685" />
-
-            <TextView
-                android:id="@+id/textView13"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/montserrat"
-                android:text="1 Frappe"
-                android:textColor="#333333"
-                android:textSize="18sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.084"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.552" />
-
-            <TextView
-                android:id="@+id/textView9"
+                android:id="@+id/txtDetallesPedido"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat"
@@ -646,7 +600,8 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.3">
+        app:layout_constraintVertical_bias="0.3"
+        tools:visibility="gone">
 
         <TextView
             android:id="@+id/textView7"

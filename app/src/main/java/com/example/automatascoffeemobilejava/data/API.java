@@ -1,8 +1,10 @@
 package com.example.automatascoffeemobilejava.data;
 
+import com.example.automatascoffeemobilejava.data.requests.CompleteRequest;
 import com.example.automatascoffeemobilejava.data.requests.DataRequest;
 import com.example.automatascoffeemobilejava.data.requests.LoginRequest;
 import com.example.automatascoffeemobilejava.data.requests.LogoutRequest;
+import com.example.automatascoffeemobilejava.data.responses.CompleteResponse;
 import com.example.automatascoffeemobilejava.data.responses.DataResponse;
 import com.example.automatascoffeemobilejava.data.responses.DeliveryResponse;
 import com.example.automatascoffeemobilejava.data.responses.DetailsResponse;
@@ -30,4 +32,7 @@ public interface API {
 
     @POST("api/mobile/logout")
     Call<LogoutResponse> logout(@Body LogoutRequest request);
+
+    @POST("api/mobile/complete")
+    Call<CompleteResponse> complete(@Body CompleteRequest request);
 }

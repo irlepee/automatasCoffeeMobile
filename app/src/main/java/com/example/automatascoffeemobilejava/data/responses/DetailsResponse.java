@@ -175,32 +175,8 @@ public class DetailsResponse {
         @SerializedName("tamaño")
         private Tamano tamaño;
 
-        public int getIdDetalleCompra() {
-            return idDetalleCompra;
-        }
-
-        public int getIdCompra() {
-            return idCompra;
-        }
-
-        public int getIdProducto() {
-            return idProducto;
-        }
-
-        public int getIdTamaño() {
-            return idTamaño;
-        }
-
-        public int getCantidad() {
-            return cantidad;
-        }
-
-        public String getPrecioUnitario() {
+        public String getPrecio() {
             return precioUnitario;
-        }
-
-        public String getSubtotal() {
-            return subtotal;
         }
 
         public Producto getProducto() {
@@ -274,6 +250,11 @@ public class DetailsResponse {
 
         public Map<String, Integer> getStocks() {
             return stocks;
+        }
+
+        // Método para obtener el precio según el tamaño
+        public String getPrecioPorTamano(String idTamano) {
+            return precios != null && precios.containsKey(idTamano) ? precios.get(idTamano) : "Precio no disponible";
         }
     }
 

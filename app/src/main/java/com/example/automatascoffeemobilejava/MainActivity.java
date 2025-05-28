@@ -34,9 +34,11 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 
 import com.example.automatascoffeemobilejava.data.API;
+import com.example.automatascoffeemobilejava.data.requests.CompleteRequest;
 import com.example.automatascoffeemobilejava.data.requests.DataRequest;
 import com.example.automatascoffeemobilejava.data.requests.LoginRequest;
 import com.example.automatascoffeemobilejava.data.requests.LogoutRequest;
+import com.example.automatascoffeemobilejava.data.responses.CompleteResponse;
 import com.example.automatascoffeemobilejava.data.responses.DataResponse;
 import com.example.automatascoffeemobilejava.data.responses.DeliveryResponse;
 import com.example.automatascoffeemobilejava.data.responses.DetailsResponse;
@@ -57,6 +59,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.gson.Gson;
 
+import org.w3c.dom.Text;
+
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -71,8 +75,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
-
     private int id_repartidor = -1; // Valor inicial por defecto
+    private int id_Pedido = -1; // Valor inicial por defecto
 
 
     //-METODO PRINCIPAL-
@@ -108,6 +112,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Button cancelButton = findViewById(R.id.cancelButton);
         Button completeCardButton = findViewById(R.id.completeCardButton);
         Button logoutButton = findViewById(R.id.logoutButton);
+
+        TextView txtPedidoPara = findViewById(R.id.txtPedidoPara);
+        TextView txtDireccion = findViewById(R.id.txtDireccion);
+        TextView txtTiempo = findViewById(R.id.txtTiempo);
+        TextView txtDistancia = findViewById(R.id.txtDistancia);
+        TextView txtDetallesPedido = findViewById(R.id.txtDetallesPedido);
+
+
+
 
         int bottomCardMaximumSize = 375;
         int bottomCardMinimalSize = 135;
@@ -560,6 +573,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .scaleX(0f)
                                 .setDuration(150)
                                 .withEndAction(() -> completeCard.setVisibility(View.GONE));
+                        CompleteRequest completeRequest = new CompleteRequest(id_Pedido);
+                        api.complete(completeRequest).enqueue(new retrofit2.Callback<CompleteResponse>() {
+                            @Override
+                            public void onResponse(Call<CompleteResponse> call, Response<CompleteResponse> response) {
+                                if (response.isSuccessful()) {
+                                    Toast.makeText(MainActivity.this, "Pedido completado exitosamente", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Error al completar el pedido", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<CompleteResponse> call, Throwable t) {
+                                Log.e("COMPLETE", "Error al conectarse con el servidor: " + t.getMessage());
+                                Toast.makeText(MainActivity.this, "Error al conectarse con el servidor", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                         return true;
                     default:
                         return false;
@@ -834,6 +864,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     private void realizarConsulta(API api, int id_pedido) {
+        TextView txtPedidoPara = findViewById(R.id.txtPedidoPara);
+        TextView txtDireccion = findViewById(R.id.txtDireccion);
+        TextView txtTiempo = findViewById(R.id.txtTiempo);
+        TextView txtDistancia = findViewById(R.id.txtDistancia);
+        TextView txtDetallesPedido = findViewById(R.id.txtDetallesPedido);
         Call<DetailsResponse> call = api.getDetails(id_pedido);
         Log.d("API_URL", call.request().url().toString()); // Imprime la URL antes de ejecutar la llamada
 
@@ -845,33 +880,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     DetailsResponse details = response.body();
                     if (details.getPurchase() != null) {
-                        String usuario = details.getPurchase().getUsuario();
-                        String repartidor = details.getPurchase().getRepartidor();
-                        String latitud = details.getPurchase().getLatitud();
-                        String longitud = details.getPurchase().getLongitud();
-                        String total = details.getPurchase().getTotal();
-                        String estatus = details.getPurchase().getEstatus();
-                        int idTarjeta = details.getPurchase().getIdTarjeta();
+                        id_Pedido = details.getPurchase().getId(); // Actualiza la variable global id_pedido
 
-                        String tamano = details.getDetails().isEmpty() || details.getDetails().get(0).getTamaño() == null
-                                ? "N/A"
-                                : details.getDetails().get(0).getTamaño().getNombre();
+                        // Formatear los detalles del pedido
+                        StringBuilder detallesBuilder = new StringBuilder();
+                        for (DetailsResponse.Detail detail : details.getDetails()) {
+                            String producto = detail.getProducto() != null ? detail.getProducto().getNombre() : "Producto desconocido";
+                            String tamano = detail.getTamaño() != null ? detail.getTamaño().getNombre() : "Tamaño no especificado";
+                            String precio = detail.getPrecio() != null ? "$" + detail.getPrecio() : "Precio no disponible";
 
-                        String producto = details.getDetails().isEmpty() || details.getDetails().get(0).getProducto() == null
-                                ? "N/A"
-                                : details.getDetails().get(0).getProducto().getNombre();
+                            detallesBuilder.append("- ")
+                                    .append(producto)
+                                    .append(" (")
+                                    .append(tamano)
+                                    .append(") - ")
+                                    .append(precio)
+                                    .append("\n");
+                        }
 
-                        Toast.makeText(MainActivity.this,
-                                "Usuario: " + usuario +
-                                        ", Total: " + total +
-                                        ", Estatus: " + estatus +
-                                        ", Repartidor: " + repartidor +
-                                        ", Latitud: " + latitud +
-                                        ", Longitud: " + longitud +
-                                        ", Tamaño: " + tamano +
-                                        ", Producto: " + producto +
-                                        ", ID Tarjeta: " + idTarjeta,
-                                Toast.LENGTH_SHORT).show();
+                        // Actualizar los TextView con los datos
+                        txtPedidoPara.setText("Pedido para: " + details.getPurchase().getUsuario());
+                        txtDireccion.setText("Dirección: " + details.getPurchase().getLatitud() + ", " + details.getPurchase().getLongitud());
+                        txtTiempo.setText("Tiempo: " + " min");
+                        txtDistancia.setText("Distanwcia: " + " km");
+                        txtDetallesPedido.setText(detallesBuilder.toString());
                     }
                 } else {
                     try {
@@ -889,7 +921,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(MainActivity.this, "Error al conectarse con el servidor", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
+
 
 }
