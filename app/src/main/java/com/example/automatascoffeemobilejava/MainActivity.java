@@ -42,6 +42,7 @@ import com.example.automatascoffeemobilejava.data.responses.CompleteResponse;
 import com.example.automatascoffeemobilejava.data.responses.DataResponse;
 import com.example.automatascoffeemobilejava.data.responses.DeliveryResponse;
 import com.example.automatascoffeemobilejava.data.responses.DetailsResponse;
+import com.example.automatascoffeemobilejava.data.responses.DirectionsResponse;
 import com.example.automatascoffeemobilejava.data.responses.LoginResponse;
 import com.example.automatascoffeemobilejava.data.responses.LogoutResponse;
 import com.example.automatascoffeemobilejava.model.Repartidor;
@@ -57,11 +58,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -721,7 +727,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordenadas, 15));
     }
 
+
+
+
+
+
     public void logueado(API api, int id) {
+
         TextView txtNombre = findViewById(R.id.txtNombre);
         TextView txtTelefono = findViewById(R.id.txtTelefono);
         TextView txtCurp = findViewById(R.id.txtCURP);
@@ -869,59 +881,128 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         TextView txtTiempo = findViewById(R.id.txtTiempo);
         TextView txtDistancia = findViewById(R.id.txtDistancia);
         TextView txtDetallesPedido = findViewById(R.id.txtDetallesPedido);
-        Call<DetailsResponse> call = api.getDetails(id_pedido);
-        Log.d("API_URL", call.request().url().toString()); // Imprime la URL antes de ejecutar la llamada
 
+        Call<DetailsResponse> call = api.getDetails(id_pedido);
         call.enqueue(new retrofit2.Callback<DetailsResponse>() {
             @Override
             public void onResponse(Call<DetailsResponse> call, Response<DetailsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d("JSON_RESPONSE", new Gson().toJson(response.body()));
-
                     DetailsResponse details = response.body();
                     if (details.getPurchase() != null) {
-                        id_Pedido = details.getPurchase().getId(); // Actualiza la variable global id_pedido
+                        id_Pedido = details.getPurchase().getId();
 
-                        // Formatear los detalles del pedido
-                        StringBuilder detallesBuilder = new StringBuilder();
-                        for (DetailsResponse.Detail detail : details.getDetails()) {
-                            String producto = detail.getProducto() != null ? detail.getProducto().getNombre() : "Producto desconocido";
-                            String tamano = detail.getTamaño() != null ? detail.getTamaño().getNombre() : "Tamaño no especificado";
-                            String precio = detail.getPrecio() != null ? "$" + detail.getPrecio() : "Precio no disponible";
-
-                            detallesBuilder.append("- ")
-                                    .append(producto)
-                                    .append(" (")
-                                    .append(tamano)
-                                    .append(") - ")
-                                    .append(precio)
-                                    .append("\n");
-                        }
-
-                        // Actualizar los TextView con los datos
+                        // Actualiza los TextView
                         txtPedidoPara.setText("Pedido para: " + details.getPurchase().getUsuario());
                         txtDireccion.setText("Dirección: " + details.getPurchase().getLatitud() + ", " + details.getPurchase().getLongitud());
                         txtTiempo.setText("Tiempo: " + " min");
-                        txtDistancia.setText("Distanwcia: " + " km");
-                        txtDetallesPedido.setText(detallesBuilder.toString());
+                        txtDistancia.setText("Distancia: " + " km");
+
+                        // Dibuja la ruta en el mapa
+                        LatLng origen = new LatLng(25.814700, -108.979991); // Coordenadas de ejemplo (ubicación inicial)
+                        LatLng destino = new LatLng(
+                                Double.parseDouble(details.getPurchase().getLatitud()),
+                                Double.parseDouble(details.getPurchase().getLongitud())
+                        );
+                        String apiKey = "AIzaSyCyGHnAIzv3n8PjibgZ7HQTMwzbuMvktDY"; // Reemplaza con tu clave de API
+                        mostrarRuta(api, destino, apiKey);
                     }
-                } else {
-                    try {
-                        Log.e("JSON_ERROR", response.errorBody().string());
-                    } catch (Exception e) {
-                        Log.e("JSON_ERROR", "Error al leer el cuerpo de la respuesta", e);
-                    }
-                    Toast.makeText(MainActivity.this, "Error en la consulta", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<DetailsResponse> call, Throwable t) {
-                Log.e("API_FAILURE", "Error al conectarse con el servidor: " + t.getMessage());
-                Toast.makeText(MainActivity.this, "Error al conectarse con el servidor", Toast.LENGTH_SHORT).show();
+                Log.e("API_ERROR", "Error al obtener los detalles del pedido", t);
             }
         });
     }
 
+    private PolylineOptions currentPolyline; // Variable para almacenar la polilínea actual
+
+    private void mostrarRuta(API api, LatLng destino, String apiKey) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            return;
+        }
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                LatLng posicionActual = new LatLng(location.getLatitude(), location.getLongitude());
+
+                // Llama a la API de direcciones
+                String url = "https://maps.googleapis.com/maps/api/directions/json?origin="
+                        + posicionActual.latitude + "," + posicionActual.longitude
+                        + "&destination=" + destino.latitude + "," + destino.longitude
+                        + "&key=" + apiKey;
+
+                Call<DirectionsResponse> call = api.getDirections(url);
+                call.enqueue(new Callback<DirectionsResponse>() {
+                    @Override
+                    public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<DirectionsResponse.Route> routes = response.body().getRoutes();
+                            if (routes != null && !routes.isEmpty()) {
+                                String puntos = routes.get(0).getOverviewPolyline().getPoints();
+                                List<LatLng> listaPuntos = decodePolyline(puntos);
+
+                                // Elimina la ruta anterior si existe
+                                if (currentPolyline != null) {
+                                    mMap.clear();
+                                }
+
+                                // Dibuja la nueva ruta en el mapa
+                                currentPolyline = new PolylineOptions()
+                                        .addAll(listaPuntos)
+                                        .color(Color.rgb(139, 69, 19)) // Color café
+                                        .width(10f);
+                                mMap.addPolyline(currentPolyline);
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(posicionActual, 15));
+                            } else {
+                                Toast.makeText(MainActivity.this, "No se encontraron rutas.", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(MainActivity.this, "Error al obtener direcciones.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+                        Log.e("API_DIRECCIONES", "Error al conectar con la API de direcciones", t);
+                    }
+                });
+            } else {
+                Toast.makeText(this, "No se pudo obtener la ubicación actual.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private List<LatLng> decodePolyline(String encoded) {
+        List<LatLng> poly = new ArrayList<>();
+        int index = 0, len = encoded.length();
+        int lat = 0, lng = 0;
+
+        while (index < len) {
+            int b, shift = 0, result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+
+            poly.add(new LatLng(lat / 1E5, lng / 1E5));
+        }
+        return poly;
+    }
 
 }

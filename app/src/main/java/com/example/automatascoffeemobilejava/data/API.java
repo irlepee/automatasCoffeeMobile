@@ -8,6 +8,7 @@ import com.example.automatascoffeemobilejava.data.responses.CompleteResponse;
 import com.example.automatascoffeemobilejava.data.responses.DataResponse;
 import com.example.automatascoffeemobilejava.data.responses.DeliveryResponse;
 import com.example.automatascoffeemobilejava.data.responses.DetailsResponse;
+import com.example.automatascoffeemobilejava.data.responses.DirectionsResponse;
 import com.example.automatascoffeemobilejava.data.responses.LoginResponse;
 import com.example.automatascoffeemobilejava.data.responses.LogoutResponse;
 
@@ -16,6 +17,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
+import retrofit2.http.Url;
 
 public interface API {
     @POST("api/mobile/login")
@@ -35,4 +37,7 @@ public interface API {
 
     @POST("api/mobile/complete")
     Call<CompleteResponse> complete(@Body CompleteRequest request);
+
+    @GET
+    Call<DirectionsResponse> getDirections(@Url String url);
 }
