@@ -162,7 +162,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat_semibold"
-                android:text="1.- Especial para Automatas Software"
+                android:text="1.- Pedido #A5126"
                 android:textAlignment="center"
                 android:textColor="#333333"
                 android:textSize="14sp"
@@ -273,8 +273,8 @@
 
             <TextView
                 android:id="@+id/textView6"
-                android:layout_width="67dp"
-                android:layout_height="27dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat_bold"
                 android:text="3.2 KM"
                 android:textAlignment="center"
@@ -302,8 +302,8 @@
 
             <TextView
                 android:id="@+id/textView5"
-                android:layout_width="63dp"
-                android:layout_height="26dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat_bold"
                 android:text="8 MIN"
                 android:textAlignment="center"
@@ -428,6 +428,7 @@
             android:layout_width="60dp"
             android:layout_height="40dp"
             android:background="@drawable/bg_bottomcard_elements"
+            android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/bottomCardInfo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
@@ -469,7 +470,8 @@
         android:id="@+id/opacityCard"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#9C000000"/>
+        android:background="#9C000000"
+        tools:visibility="gone" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/loginCard"
@@ -638,8 +640,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.3"
-        tools:visibility="gone">
+        app:layout_constraintVertical_bias="0.3">
 
         <TextView
             android:id="@+id/textView7"
@@ -670,18 +671,18 @@
             app:layout_constraintVertical_bias="0.95" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.99"
+            app:layout_constraintHorizontal_bias="0.98"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.01">
+            app:layout_constraintVertical_bias="0.02">
 
             <Button
                 android:id="@+id/infoCardCloser"
-                android:layout_width="40dp"
+                android:layout_width="30dp"
                 android:layout_height="50dp"
                 android:background="#00FFFFFF"
                 android:fontFamily="@font/montserrat_semibold"
@@ -692,22 +693,21 @@
                 android:textSize="34sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="1.0" />
+                app:layout_constraintVertical_bias="0.76" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout"
             android:layout_width="250dp"
-            android:layout_height="200dp"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toTopOf="@+id/button"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageView"
-            app:layout_constraintVertical_bias="0.5">
+            app:layout_constraintVertical_bias="0.3">
 
             <TextView
                 android:id="@+id/textView10"
@@ -717,12 +717,12 @@
                 android:text="Nombre:"
                 android:textColor="#333333"
                 android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/txtNombre"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.05" />
+                app:layout_constraintVertical_bias="0.5" />
 
             <TextView
                 android:id="@+id/textView18"
@@ -732,12 +732,12 @@
                 android:text="Teléfono:"
                 android:textColor="#333333"
                 android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/txtTelefono"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.25" />
+                app:layout_constraintTop_toBottomOf="@+id/txtNombre"
+                app:layout_constraintVertical_bias="0.5" />
 
             <TextView
                 android:id="@+id/textView19"
@@ -747,12 +747,12 @@
                 android:text="CURP:"
                 android:textColor="#333333"
                 android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/txtCURP"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.45" />
+                app:layout_constraintTop_toBottomOf="@+id/txtTelefono"
+                app:layout_constraintVertical_bias="0.5" />
 
             <TextView
                 android:id="@+id/textView20"
@@ -762,12 +762,12 @@
                 android:text="Tipo de sangre:"
                 android:textColor="#333333"
                 android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/txtSangre"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.65" />
+                app:layout_constraintTop_toBottomOf="@+id/txtCURP"
+                app:layout_constraintVertical_bias="0.5" />
 
             <TextView
                 android:id="@+id/textView21"
@@ -777,12 +777,83 @@
                 android:text="Vigencia de licencia:"
                 android:textColor="#333333"
                 android:textSize="16sp"
+                app:layout_constraintBottom_toTopOf="@+id/txtVigencia"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txtSangre"
+                app:layout_constraintVertical_bias="0.5" />
+
+            <TextView
+                android:id="@+id/txtNombre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pito Perez"
+                android:textColor="#406BD9"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toTopOf="@+id/textView18"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView10"
+                app:layout_constraintVertical_bias="0.5" />
+
+            <TextView
+                android:id="@+id/txtTelefono"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="6688292929"
+                android:textColor="#406BD9"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toTopOf="@+id/textView19"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView18"
+                app:layout_constraintVertical_bias="0.5" />
+
+            <TextView
+                android:id="@+id/txtCURP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LEJI0405005HSLPTTA1"
+                android:textColor="#406BD9"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toTopOf="@+id/textView20"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView19"
+                app:layout_constraintVertical_bias="0.5" />
+
+            <TextView
+                android:id="@+id/txtSangre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="O+"
+                android:textColor="#406BD9"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toTopOf="@+id/textView21"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView20"
+                app:layout_constraintVertical_bias="0.5" />
+
+            <TextView
+                android:id="@+id/txtVigencia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:text="05-05-2005"
+                android:textColor="#406BD9"
+                android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.85" />
+                app:layout_constraintTop_toBottomOf="@+id/textView21"
+                app:layout_constraintVertical_bias="0.5" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -791,12 +862,12 @@
             android:layout_width="150dp"
             android:layout_height="100dp"
             android:contentDescription="Imagen del repartidor"
-            android:scaleType="centerCrop"
+            android:scaleType="fitCenter"
             app:layout_constraintBottom_toTopOf="@+id/framelayout4"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/framelayout5"
-            app:srcCompat="@drawable/lillia" />
+            app:srcCompat="@drawable/usericon2" />
 
         <FrameLayout
             android:id="@+id/framelayout4"
@@ -839,7 +910,8 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.5">
+        app:layout_constraintVertical_bias="0.5"
+        tools:visibility="gone">
 
         <TextView
             android:id="@+id/textView22"

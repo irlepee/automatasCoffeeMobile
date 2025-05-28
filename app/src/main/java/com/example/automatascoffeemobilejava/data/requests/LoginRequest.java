@@ -1,4 +1,4 @@
-package com.example.automatascoffeemobilejava.data;
+package com.example.automatascoffeemobilejava.data.requests;
 
 public class LoginRequest {
     String username;

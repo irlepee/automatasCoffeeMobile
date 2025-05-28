@@ -5,14 +5,11 @@ import static com.example.automatascoffeemobilejava.utils.DimensionUtils.dpToPx;
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.RenderEffect;
-import android.graphics.Shader;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,16 +27,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentContainerView;
 
 import com.example.automatascoffeemobilejava.data.API;
-import com.example.automatascoffeemobilejava.data.LoginRequest;
-import com.example.automatascoffeemobilejava.data.LoginResponse;
+import com.example.automatascoffeemobilejava.data.requests.DataRequest;
+import com.example.automatascoffeemobilejava.data.requests.LoginRequest;
+import com.example.automatascoffeemobilejava.data.responses.DataResponse;
+import com.example.automatascoffeemobilejava.data.responses.LoginResponse;
+import com.example.automatascoffeemobilejava.model.Repartidor;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -52,7 +51,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.Marker;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -78,11 +76,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
-
-
-
-
-
 
 
         //---CARGAR ELEMENTOS DEL DISEÑO---
@@ -146,10 +139,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         opacityCard.setClickable(true);
 
 
-
-
-
-
         //---ELEMENTOS EXTRAS---
 
         //-Declarar vibrador-
@@ -170,15 +159,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
 
-
-
-
-
-
-
-
-
-
         //---UBICACIÓN Y SEGUIMIENTO DE UBICACIÓN---
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -195,10 +175,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         startLocationUpdates();
 
 
-
-
-
-
         //---BACKEND---
 
         //Realiza las solicitudes http, usará esa url y la api para el trabajo necesario
@@ -210,8 +186,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         txtUser.setText("alex075");
         txtPassword.setText("Evolve075_");
-
-        //Obtener todos los pedidos referentes al repartidor
 
 
         //---FUNCIONAMIENTO DEL DISEÑO---
@@ -227,7 +201,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         LoginResponse loginResponse = response.body();
 
                         //El cuerpo es un booleano entonces aquí revisa la condición de este
-                        if(loginResponse.isSuccess()) {
+                        if (loginResponse.isSuccess()) {
+                            Toast.makeText(MainActivity.this, loginResponse.getStatus(), Toast.LENGTH_SHORT).show();
+                            int id = loginResponse.getId();
                             opacityCard.setClickable(false);
                             loginCard.animate()
                                     .scaleX(1.15f)
@@ -283,7 +259,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             if (view != null) {
                                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                             }
+
+                            logueado(api, id);
+
                         } else {
+                            Toast.makeText(MainActivity.this, loginResponse.getStatus(), Toast.LENGTH_SHORT).show();
                             loginCard.animate()
                                     .translationX(15f)
                                     .setDuration(50)
@@ -313,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 @Override
                 public void onFailure(Call<LoginResponse> call, Throwable t) {
-                    Log.e("Login", "Error al conectar: ", t);
+                    Toast.makeText(MainActivity.this, "Error al conectarse con el servidor", Toast.LENGTH_SHORT).show();
                 }
 
             });
@@ -477,6 +457,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        //x para cerrar la infoCard
         infoCardCloser.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -499,6 +480,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        //boton para completar el pedido
         completeCardButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -527,6 +509,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        //boton para cancelar el completado del pedido
         cancelButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -549,6 +532,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        //boton para confirmar el completado del pedidoq
         completeButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -574,11 +558,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
     }
-
-
-
-
-
 
 
     //-METODO DE PERMISOS Y SEGUIMIENTO DE UBICACIÓN-
@@ -626,5 +605,47 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng coordenadas = new LatLng(25.814700, -108.979991);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordenadas, 15));
     }
+
+    public void logueado(API api, int id) {
+        // OBTENCIÓN DE DATOS DEL REPARTIDOR
+        DataRequest dataRequest = new DataRequest(id);
+        api.data(dataRequest).enqueue(new retrofit2.Callback<DataResponse>() {
+            @Override
+            public void onResponse(Call<DataResponse> call, Response<DataResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    DataResponse dataResponse = response.body();
+                    Repartidor data = dataResponse.getData();
+
+                    TextView txtNombre = findViewById(R.id.txtNombre);
+                    TextView txtTelefono = findViewById(R.id.txtTelefono);
+                    TextView txtCurp = findViewById(R.id.txtCURP);
+                    TextView txtSangre = findViewById(R.id.txtSangre);
+                    TextView txtVigencia = findViewById(R.id.txtVigencia);
+
+                    // Asignación de datos a los TextViews
+                    txtNombre.setText(data.getNombre() + " " + data.getApellido1() + " " + data.getApellido2());
+                    txtTelefono.setText(data.getTelefono());
+                    txtCurp.setText(data.getCurp());
+                    txtSangre.setText(data.getTipo_sangre());
+                    txtVigencia.setText(data.getVigencia_licencia());
+
+
+                } else {
+                    // Manejo de error en caso de respuesta no exitosa
+                    Toast.makeText(MainActivity.this, "Error en la respuesta del servidor", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DataResponse> call, Throwable t) {
+                // Manejo de error en caso de fallo de conexión
+                Log.e("DATA", "Error al conectarse con el servidor: " + t.getMessage());
+                Toast.makeText(MainActivity.this, "Error al conectarse con el servidor", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+
 
 }
