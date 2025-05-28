@@ -2,10 +2,12 @@ package com.example.automatascoffeemobilejava.data;
 
 import com.example.automatascoffeemobilejava.data.requests.DataRequest;
 import com.example.automatascoffeemobilejava.data.requests.LoginRequest;
+import com.example.automatascoffeemobilejava.data.requests.LogoutRequest;
 import com.example.automatascoffeemobilejava.data.responses.DataResponse;
 import com.example.automatascoffeemobilejava.data.responses.DeliveryResponse;
 import com.example.automatascoffeemobilejava.data.responses.DetailsResponse;
 import com.example.automatascoffeemobilejava.data.responses.LoginResponse;
+import com.example.automatascoffeemobilejava.data.responses.LogoutResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -25,4 +27,7 @@ public interface API {
 
     @GET("api/mobile/details")
     Call<DetailsResponse> getDetails(@Query("id") int idCompra);
+
+    @POST("api/mobile/logout")
+    Call<LogoutResponse> logout(@Body LogoutRequest request);
 }

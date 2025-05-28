@@ -36,10 +36,12 @@ import androidx.core.app.ActivityCompat;
 import com.example.automatascoffeemobilejava.data.API;
 import com.example.automatascoffeemobilejava.data.requests.DataRequest;
 import com.example.automatascoffeemobilejava.data.requests.LoginRequest;
+import com.example.automatascoffeemobilejava.data.requests.LogoutRequest;
 import com.example.automatascoffeemobilejava.data.responses.DataResponse;
 import com.example.automatascoffeemobilejava.data.responses.DeliveryResponse;
 import com.example.automatascoffeemobilejava.data.responses.DetailsResponse;
 import com.example.automatascoffeemobilejava.data.responses.LoginResponse;
+import com.example.automatascoffeemobilejava.data.responses.LogoutResponse;
 import com.example.automatascoffeemobilejava.model.Repartidor;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -70,6 +72,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
 
+    private int id_repartidor = -1; // Valor inicial por defecto
+
+
     //-METODO PRINCIPAL-
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -79,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
-
 
         //---CARGAR ELEMENTOS DEL DISEÑO---
 
@@ -103,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Button completeButton = findViewById(R.id.completeButton);
         Button cancelButton = findViewById(R.id.cancelButton);
         Button completeCardButton = findViewById(R.id.completeCardButton);
+        Button logoutButton = findViewById(R.id.logoutButton);
 
         int bottomCardMaximumSize = 375;
         int bottomCardMinimalSize = 135;
@@ -182,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //Realiza las solicitudes http, usará esa url y la api para el trabajo necesario
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.100.214:8000/")
+                .baseUrl("http://192.168.153.4:8000/")
                 .addConverterFactory(GsonConverterFactory.create()) //Convertidor de JSON a objeto, al enviar y recibir datos
                 .build();
         API api = retrofit.create(API.class);
@@ -298,7 +303,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 @Override
                 public void onFailure(Call<LoginResponse> call, Throwable t) {
-                    Toast.makeText(MainActivity.this, "Error al conectarse con el servidor", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Error al conectarse con el servidor" + t, Toast.LENGTH_SHORT).show();
                 }
 
             });
@@ -562,6 +567,81 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        //boton para cerrar sesión
+        logoutButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        opacityCard.setClickable(false);
+                        opacityCard.animate()
+                                .alpha(0f)
+                                .setDuration(200)
+                                .withEndAction(() -> opacityCard.setVisibility(View.GONE));
+                        topCard.animate()
+                                .scaleX(0f)
+                                .scaleY(0f)
+                                .setDuration(200)
+                                .withEndAction(() -> topCard.setVisibility(View.GONE));
+                        bottomCard.animate()
+                                .scaleX(0f)
+                                .scaleY(0f)
+                                .translationY(bottomCardMinimalHeight)
+                                .setDuration(200)
+                                .withEndAction(() -> bottomCard.setVisibility(View.GONE));
+                        infoCard.animate()
+                                .scaleX(0f)
+                                .scaleY(0f)
+                                .setDuration(200)
+                                .withEndAction(() -> infoCard.setVisibility(View.GONE))
+                                .start();
+
+                        loginCard.setVisibility(View.VISIBLE);
+                        loginCard.animate()
+                                .scaleX(1.15f)
+                                .scaleY(1.15f)
+                                .setDuration(200)
+                                .withEndAction(() -> {
+                                    loginCard.animate()
+                                            .scaleX(1.0f)
+                                            .scaleY(1.0f)
+                                            .setDuration(200)
+                                            .start();
+                                    opacityCard.setVisibility(View.VISIBLE);
+                                    opacityCard.setClickable(true);
+                                    opacityCard.animate()
+                                            .alpha(1f)
+                                            .setDuration(200)
+                                            .start();
+                                });
+                        LogoutRequest logoutRequest = new LogoutRequest(id_repartidor);Log.d("LOGOUT_REQUEST", new Gson().toJson(logoutRequest));
+                        Log.d("LOGOUT_REQUEST", new Gson().toJson(logoutRequest));
+                        api.logout(logoutRequest).enqueue(new retrofit2.Callback<LogoutResponse>() {
+                            @Override
+                            public void onResponse(Call<LogoutResponse> call, Response<LogoutResponse> response) {
+                                if (response.isSuccessful()) {
+                                    Toast.makeText(MainActivity.this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Error al cerrar sesión", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<LogoutResponse> call, Throwable t) {
+                                Log.e("LOGOUT", "Error al conectarse con el servidor: " + t.getMessage());
+                                Toast.makeText(MainActivity.this, "Error al conectarse con el servidor", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+
+                        return true;
+                    default:
+                        return false;
+
+                }
+            }
+        });
+
     }
 
 
@@ -640,7 +720,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     txtSangre.setText(data.getTipo_sangre());
                     txtVigencia.setText(data.getVigencia_licencia());
 
-                    int id_repartidor = data.getId();
+                    id_repartidor = data.getId();
 
                     // OBTENCIÓN DE PEDIDOS después de obtener los datos del repartidor
                     api.pedidos(id_repartidor, 3).enqueue(new retrofit2.Callback<DeliveryResponse>() {
