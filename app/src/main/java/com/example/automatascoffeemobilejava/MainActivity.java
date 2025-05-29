@@ -62,8 +62,6 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,40 +71,25 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import android.Manifest;
-import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.Objects;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
 
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private Socket socket;
-    private Handler handler = new Handler();
-    private Runnable locationRunnable;
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
     private int id_repartidor = -1; // Valor inicial por defecto
     private int id_Pedido = -1; // Valor inicial por defecto
+    private List<int[]> estadoPedidos = new ArrayList<>(); // Lista para almacenar el estado de los pedidos
 
 
     //-METODO PRINCIPAL-
@@ -150,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Button cancelButton = findViewById(R.id.cancelButton);
         Button completeCardButton = findViewById(R.id.completeCardButton);
         Button logoutButton = findViewById(R.id.logoutButton);
-
 
 
         int bottomCardMaximumSize = 375;
@@ -241,8 +223,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         txtPassword.setText("Evolve075_");
 
 
-
-
         //---FUNCIONAMIENTO DEL DISEÑO---
 
         //login
@@ -258,7 +238,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             Toast.makeText(MainActivity.this, loginResponse.getStatus(), Toast.LENGTH_SHORT).show();
                             int id = loginResponse.getId();
                             id_repartidor = id; // Asigna el ID del repartidor
-
 
 
                             // Animaciones y lógica de UI tras el inicio de sesión
@@ -595,7 +574,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        //boton para confirmar el completado del pedidoq
+        //boton para confirmar el completado del pedido
         completeButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -619,7 +598,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             public void onResponse(Call<CompleteResponse> call, Response<CompleteResponse> response) {
                                 if (response.isSuccessful()) {
                                     Toast.makeText(MainActivity.this, "Pedido completado exitosamente", Toast.LENGTH_SHORT).show();
-                                } else {
+                                    realizarConsulta(api, id_Pedido);
+                                    completarPedido(api, id_Pedido);
+                               } else {
                                     Toast.makeText(MainActivity.this, "Error al completar el pedido", Toast.LENGTH_SHORT).show();
                                 }
                             }
@@ -684,7 +665,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             .setDuration(200)
                                             .start();
                                 });
-                        LogoutRequest logoutRequest = new LogoutRequest(id_repartidor);Log.d("LOGOUT_REQUEST", new Gson().toJson(logoutRequest));
+                        LogoutRequest logoutRequest = new LogoutRequest(id_repartidor);
+                        Log.d("LOGOUT_REQUEST", new Gson().toJson(logoutRequest));
                         Log.d("LOGOUT_REQUEST", new Gson().toJson(logoutRequest));
                         api.logout(logoutRequest).enqueue(new retrofit2.Callback<LogoutResponse>() {
                             @Override
@@ -762,10 +744,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-
-
-
-
     public void logueado(API api, int id) {
 
         TextView txtNombre = findViewById(R.id.txtNombre);
@@ -802,7 +780,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     api.pedidos(id_repartidor, 3).enqueue(new retrofit2.Callback<DeliveryResponse>() {
                         @Override
                         public void onResponse(Call<DeliveryResponse> call, Response<DeliveryResponse> response) {
-                            Log.d("URL", call.request().url().toString()); // Imprime la URL antes de procesar la respuesta
+                            DeliveryResponse deliveryResponse = response.body();
+                            String[] deliveries = deliveryResponse.getDeliveries();
+
+                            if(deliveries != null && deliveries.length > 0) {
+                                for (String id : deliveries) {
+                                    enlistarPedidos(Integer.parseInt(id));
+                                }
+                            }
+
 
                             if (response.isSuccessful() && response.body() != null) {
                                 pedidoButton1.setOnClickListener(v -> {
@@ -830,9 +816,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 });
 
 
-                                DeliveryResponse deliveryResponse = response.body();
                                 String status = deliveryResponse.getStatus();
-                                String[] deliveries = deliveryResponse.getDeliveries();
 
                                 if (deliveries != null && deliveries.length > 0) {
                                     txtPedido1.setText(deliveries.length > 0 ? "Pedido con ID: " + deliveries[0] : "");
@@ -923,38 +907,55 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (response.isSuccessful() && response.body() != null) {
                     DetailsResponse details = response.body();
                     if (details.getPurchase() != null) {
-                        id_Pedido = details.getPurchase().getId();
+                        String status = details.getPurchase().getEstatus(); // Obtén el estado del pedido
 
-                        // Actualiza los TextView existentes
-                        txtPedidoPara.setText("Pedido para: " + details.getPurchase().getUsuario());
-                        txtDireccion.setText("Dirección: " + details.getPurchase().getLatitud() + ", " + details.getPurchase().getLongitud());
-                        txtTiempo.setText("Tiempo: " + " min");
-                        txtDistancia.setText("Distancia: " + " km");
+                        if (Objects.equals(status, "Entregado")) {
+                            // Pedido completado
+                            txtPedidoPara.setText("PEDIDO COMPLETADO");
+                            txtPedidoPara.setTextColor(Color.parseColor("#006400"));
 
-                        // Agrega los detalles del pedido
-                        StringBuilder detalles = new StringBuilder();
-                        for (DetailsResponse.Detail detalle : details.getDetails()) {
-                            String nombreProducto = detalle.getProducto().getNombre();
-                            String tamañoProducto = detalle.getTamaño().getNombre();
-                            String precioProducto = detalle.getPrecio();
+                            // Limpia los demás campos
+                            txtDireccion.setText("");
+                            txtTiempo.setText("");
+                            txtDistancia.setText("");
+                            txtDetallesPedido.setText("");
 
-                            detalles.append(nombreProducto)
-                                    .append(" (")
-                                    .append(tamañoProducto)
-                                    .append(") - $")
-                                    .append(precioProducto)
-                                    .append("\n");
+                            // Limpia el mapa
+                            if (mMap != null) {
+                                mMap.clear();
+                            }
+                        } else {
+                            // Pedido en curso, procesa normalmente
+                            id_Pedido = details.getPurchase().getId();
+
+                            txtPedidoPara.setText("Pedido para: " + details.getPurchase().getUsuario());
+                            txtPedidoPara.setTextColor(Color.parseColor("#333333"));
+                            txtDireccion.setText("Dirección: " + details.getPurchase().getLatitud() + ", " + details.getPurchase().getLongitud());
+                            txtTiempo.setText("Tiempo: " + " min");
+                            txtDistancia.setText("Distancia: " + " km");
+
+                            StringBuilder detalles = new StringBuilder();
+                            for (DetailsResponse.Detail detalle : details.getDetails()) {
+                                String nombreProducto = detalle.getProducto().getNombre();
+                                String tamañoProducto = detalle.getTamaño().getNombre();
+                                String precioProducto = detalle.getPrecio();
+
+                                detalles.append(nombreProducto)
+                                        .append(" (")
+                                        .append(tamañoProducto)
+                                        .append(") - $")
+                                        .append(precioProducto)
+                                        .append("\n");
+                            }
+                            txtDetallesPedido.setText(detalles.toString().trim());
+
+                            LatLng destino = new LatLng(
+                                    Double.parseDouble(details.getPurchase().getLatitud()),
+                                    Double.parseDouble(details.getPurchase().getLongitud())
+                            );
+                            String apiKey = "AIzaSyCyGHnAIzv3n8PjibgZ7HQTMwzbuMvktDY"; // Reemplaza con tu clave de API
+                            mostrarRuta(api, destino, apiKey);
                         }
-                        txtDetallesPedido.setText(detalles.toString().trim());
-
-                        // Dibuja la ruta en el mapa
-                        LatLng origen = new LatLng(25.814700, -108.979991); // Coordenadas de ejemplo (ubicación inicial)
-                        LatLng destino = new LatLng(
-                                Double.parseDouble(details.getPurchase().getLatitud()),
-                                Double.parseDouble(details.getPurchase().getLongitud())
-                        );
-                        String apiKey = "AIzaSyCyGHnAIzv3n8PjibgZ7HQTMwzbuMvktDY"; // Reemplaza con tu clave de API
-                        mostrarRuta(api, destino, apiKey);
                     }
                 }
             }
@@ -1098,4 +1099,120 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void cargarPedidos(API api) {
+        TextView txtPedido1 = findViewById(R.id.txtPedido1);
+        TextView txtPedido2 = findViewById(R.id.txtPedido2);
+        TextView txtPedido3 = findViewById(R.id.txtPedido3);
+        ImageButton pedidoButton1 = findViewById(R.id.pedidoButton1);
+        ImageButton pedidoButton2 = findViewById(R.id.pedidoButton2);
+        ImageButton pedidoButton3 = findViewById(R.id.pedidoButton3);
+
+        txtPedido1.setText("");
+        txtPedido2.setText("");
+        txtPedido3.setText("");
+
+        // OBTENCIÓN DE PEDIDOS después de obtener los datos del repartidor
+        api.pedidos(id_repartidor, 3).enqueue(new retrofit2.Callback<DeliveryResponse>() {
+            @Override
+            public void onResponse(Call<DeliveryResponse> call, Response<DeliveryResponse> response) {
+                estadoPedidos = new ArrayList<>();
+                DeliveryResponse deliveryResponse = response.body();
+                String[] deliveries = deliveryResponse.getDeliveries();
+
+                if(deliveries != null && deliveries.length > 0) {
+                    for (String id : deliveries) {
+                        enlistarPedidos(Integer.parseInt(id));
+                    }
+                }
+
+
+                if (response.isSuccessful() && response.body() != null) {
+                    pedidoButton1.setOnClickListener(v -> {
+                        resetButtonColors();
+                        pedidoButton1.setColorFilter(Color.GRAY);
+                        String text = txtPedido1.getText().toString();
+                        int id_pedido = extractIdFromText(text);
+                        realizarConsulta(api, id_pedido);
+                    });
+
+                    pedidoButton2.setOnClickListener(v -> {
+                        resetButtonColors();
+                        pedidoButton2.setColorFilter(Color.GRAY);
+                        String text = txtPedido2.getText().toString();
+                        int id_pedido = extractIdFromText(text);
+                        realizarConsulta(api, id_pedido);
+                    });
+
+                    pedidoButton3.setOnClickListener(v -> {
+                        resetButtonColors();
+                        pedidoButton3.setColorFilter(Color.GRAY);
+                        String text = txtPedido3.getText().toString();
+                        int id_pedido = extractIdFromText(text);
+                        realizarConsulta(api, id_pedido);
+                    });
+
+
+                    String status = deliveryResponse.getStatus();
+
+                    if (deliveries != null && deliveries.length > 0) {
+                        txtPedido1.setText(deliveries.length > 0 ? "Pedido con ID: " + deliveries[0] : "");
+                        txtPedido2.setText(deliveries.length > 1 ? "Pedido con ID: " + deliveries[1] : "");
+                        txtPedido3.setText(deliveries.length > 2 ? "Pedido con ID: " + deliveries[2] : "");
+
+                        pedidoButton1.setVisibility(deliveries.length > 0 ? View.VISIBLE : View.INVISIBLE);
+                        pedidoButton2.setVisibility(deliveries.length > 1 ? View.VISIBLE : View.INVISIBLE);
+                        pedidoButton3.setVisibility(deliveries.length > 2 ? View.VISIBLE : View.INVISIBLE);
+                    } else {
+                        txtPedido1.setText("No hay pedidos disponibles");
+                        txtPedido2.setText("");
+                        txtPedido3.setText("");
+
+                        pedidoButton1.setVisibility(View.INVISIBLE);
+                        pedidoButton2.setVisibility(View.INVISIBLE);
+                        pedidoButton3.setVisibility(View.INVISIBLE);
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, "Error al obtener los pedidos", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            private void resetButtonColors() {
+                pedidoButton1.setColorFilter(Color.parseColor("#ff5100"));
+                pedidoButton2.setColorFilter(Color.parseColor("#ff5100"));
+                pedidoButton3.setColorFilter(Color.parseColor("#ff5100"));
+            }
+
+
+            @Override
+            public void onFailure(Call<DeliveryResponse> call, Throwable t) {
+                Log.d("URL", call.request().url().toString()); // Imprime la URL incluso en caso de fallo
+                Log.e("PEDIDOS", "Error al conectarse con el servidor: " + t.getMessage());
+                Toast.makeText(MainActivity.this, "Error al conectarse con el servidor", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void enlistarPedidos(int id_pedido) {
+        estadoPedidos.add(new int[]{id_pedido, 0});
+        Log.d("PEDIDO_ENLISTADO", "Pedido con ID: " + id_pedido + " enlistado.");
+    }
+
+    public void completarPedido(API api, int id_pedido) {
+        for(int i=0; i < estadoPedidos.size(); ++i) {
+            if(estadoPedidos.get(i)[0] == id_pedido) {
+                estadoPedidos.get(i)[1] = 1; // Cambia el estado a completado
+                break;
+            }
+        }
+
+        // Si falta un pedido por completar, no se puede continuar
+        for (int i=0; i < estadoPedidos.size(); ++i) {
+            if(estadoPedidos.get(i)[1] == 0) {
+                return;
+            }
+        }
+
+        // Si todos los pedidos están completados, puedes avanzar
+        cargarPedidos(api);
+    }
 }
