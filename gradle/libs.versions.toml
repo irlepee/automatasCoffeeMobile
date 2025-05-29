@@ -9,6 +9,7 @@ play-services-maps = "18.2.0"
 playServicesLocation = "21.3.0"
 retrofit = "2.9.0"
 gson = "2.10.1"
+socketio = "2.0.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -21,6 +22,7 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+sockets = { group = "io.socket", name = "socket.io-client", version.ref = "socketio" }
 
 
 [plugins]

@@ -2,6 +2,7 @@ package com.example.automatascoffeemobilejava;
 
 import static com.example.automatascoffeemobilejava.utils.DimensionUtils.dpToPx;
 
+
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
@@ -72,12 +73,35 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-//---------------COSAS PENDIENTES---------------
-//Revisar lo del campo de la contraseña, el PASSWORD TRUE me arroja que es deprecated, cehcar eso
-//PONER SOMBRAS
+import android.Manifest;
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.URISyntaxException;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    private Socket socket;
+    private Handler handler = new Handler();
+    private Runnable locationRunnable;
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
@@ -95,6 +119,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
 
+        //---INICIALIZACIÓN DEL SOCKET.IO---
+        try {
+            socket = IO.socket("https://automatas-coffee-api.onrender.com");
+            socket.connect();
+            socket.on(Socket.EVENT_CONNECT, args -> Log.d("SOCKET", "Conectado al servidor"));
+            socket.on("actualizar_mapa", args -> {
+                Log.d("SOCKET", "Datos recibidos: " + args[0]);
+            });
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
         //---CARGAR ELEMENTOS DEL DISEÑO---
 
         Button btnLogin = findViewById(R.id.btnLogin);
@@ -106,10 +142,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ConstraintLayout bottomCard = findViewById(R.id.bottomCard);
         ImageButton bottomCardOpenerCloser = findViewById(R.id.bottomCardOpenerCloser);
         ImageButton topCardOpenerCloser = findViewById(R.id.topCardOpenerCloser);
-        ConstraintLayout topCardInfoButtons = findViewById(R.id.topCardInfoButtons);
-        ImageButton imageButton2 = findViewById(R.id.pedidoButton1);
-        ImageButton imageButton3 = findViewById(R.id.pedidoButton2);
-        ImageButton imageButton5 = findViewById(R.id.pedidoButton3);
         ImageButton topCardUserButton = findViewById(R.id.topCardUserButton);
         ConstraintLayout infoCard = findViewById(R.id.infoCard);
         Button infoCardCloser = findViewById(R.id.infoCardCloser);
@@ -118,13 +150,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Button cancelButton = findViewById(R.id.cancelButton);
         Button completeCardButton = findViewById(R.id.completeCardButton);
         Button logoutButton = findViewById(R.id.logoutButton);
-
-        TextView txtPedidoPara = findViewById(R.id.txtPedidoPara);
-        TextView txtDireccion = findViewById(R.id.txtDireccion);
-        TextView txtTiempo = findViewById(R.id.txtTiempo);
-        TextView txtDistancia = findViewById(R.id.txtDistancia);
-        TextView txtDetallesPedido = findViewById(R.id.txtDetallesPedido);
-
 
 
 
@@ -196,6 +221,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 for (Location location : locationResult.getLocations()) {
                     double lat = location.getLatitude();
                     double lng = location.getLongitude();
+                    enviarUbicacion(lat, lng); // Enviar ubicación al servidor
                 }
             }
         };
@@ -206,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //Realiza las solicitudes http, usará esa url y la api para el trabajo necesario
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.153.4:8000/")
+                .baseUrl("http://192.168.100.214:8000/")
                 .addConverterFactory(GsonConverterFactory.create()) //Convertidor de JSON a objeto, al enviar y recibir datos
                 .build();
         API api = retrofit.create(API.class);
@@ -225,14 +251,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             api.login(loginRequest).enqueue(new retrofit2.Callback<LoginResponse>() {
                 @Override
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-
                     if (response.isSuccessful() && response.body() != null) {
                         LoginResponse loginResponse = response.body();
 
-                        //El cuerpo es un booleano entonces aquí revisa la condición de este
                         if (loginResponse.isSuccess()) {
                             Toast.makeText(MainActivity.this, loginResponse.getStatus(), Toast.LENGTH_SHORT).show();
                             int id = loginResponse.getId();
+                            id_repartidor = id; // Asigna el ID del repartidor
+
+
+
+                            // Animaciones y lógica de UI tras el inicio de sesión
                             opacityCard.setClickable(false);
                             loginCard.animate()
                                     .scaleX(1.15f)
@@ -276,13 +305,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                             });
                                                 });
                                     });
-                            //Vibra
+
+                            // Vibración y ocultar teclado
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
                             } else {
-                                vibrator.vibrate(100); // 100 ms
+                                vibrator.vibrate(100);
                             }
-                            //Oculta el teclado
                             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                             View view = getCurrentFocus();
                             if (view != null) {
@@ -308,15 +337,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                 })
                                                 .start();
                                     });
-                            //Vibra
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
                             } else {
-                                vibrator.vibrate(100); // 100 ms
+                                vibrator.vibrate(100);
                             }
                         }
                     } else {
-
+                        try {
+                            String error = response.errorBody() != null ? response.errorBody().string() : "Error desconocido";
+                            Log.e("API_ERROR", "Error en la respuesta del servidor: " + error);
+                            Toast.makeText(MainActivity.this, "Error: " + error, Toast.LENGTH_LONG).show();
+                        } catch (Exception e) {
+                            Log.e("API_ERROR", "Error al procesar el cuerpo del error", e);
+                            Toast.makeText(MainActivity.this, "Error al procesar el error del servidor", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
 
@@ -324,7 +359,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 public void onFailure(Call<LoginResponse> call, Throwable t) {
                     Toast.makeText(MainActivity.this, "Error al conectarse con el servidor" + t, Toast.LENGTH_SHORT).show();
                 }
-
             });
         });
 
@@ -891,11 +925,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if (details.getPurchase() != null) {
                         id_Pedido = details.getPurchase().getId();
 
-                        // Actualiza los TextView
+                        // Actualiza los TextView existentes
                         txtPedidoPara.setText("Pedido para: " + details.getPurchase().getUsuario());
                         txtDireccion.setText("Dirección: " + details.getPurchase().getLatitud() + ", " + details.getPurchase().getLongitud());
                         txtTiempo.setText("Tiempo: " + " min");
                         txtDistancia.setText("Distancia: " + " km");
+
+                        // Agrega los detalles del pedido
+                        StringBuilder detalles = new StringBuilder();
+                        for (DetailsResponse.Detail detalle : details.getDetails()) {
+                            String nombreProducto = detalle.getProducto().getNombre();
+                            String tamañoProducto = detalle.getTamaño().getNombre();
+                            String precioProducto = detalle.getPrecio();
+
+                            detalles.append(nombreProducto)
+                                    .append(" (")
+                                    .append(tamañoProducto)
+                                    .append(") - $")
+                                    .append(precioProducto)
+                                    .append("\n");
+                        }
+                        txtDetallesPedido.setText(detalles.toString().trim());
 
                         // Dibuja la ruta en el mapa
                         LatLng origen = new LatLng(25.814700, -108.979991); // Coordenadas de ejemplo (ubicación inicial)
@@ -924,6 +974,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
 
+        TextView txtDireccion = findViewById(R.id.txtDireccion);
+        TextView txtTiempo = findViewById(R.id.txtTiempo);
+        TextView txtDistancia = findViewById(R.id.txtDistancia);
+
         fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
             if (location != null) {
                 LatLng posicionActual = new LatLng(location.getLatitude(), location.getLongitude());
@@ -941,8 +995,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         if (response.isSuccessful() && response.body() != null) {
                             List<DirectionsResponse.Route> routes = response.body().getRoutes();
                             if (routes != null && !routes.isEmpty()) {
-                                String puntos = routes.get(0).getOverviewPolyline().getPoints();
+                                DirectionsResponse.Route route = routes.get(0);
+                                String puntos = route.getOverviewPolyline().getPoints();
                                 List<LatLng> listaPuntos = decodePolyline(puntos);
+
+                                // Obtén la distancia, duración y dirección
+                                String distancia = route.getLegs().get(0).getDistance().getText();
+                                String duracion = route.getLegs().get(0).getDuration().getText();
+                                String direccion = route.getLegs().get(0).getEndAddress();
+
+                                // Actualiza los TextView
+                                txtDistancia.setText("Distancia: " + distancia);
+                                txtTiempo.setText("Tiempo: " + duracion);
+                                txtDireccion.setText("Dirección: " + direccion);
 
                                 // Elimina la ruta anterior si existe
                                 if (currentPolyline != null) {
@@ -1003,6 +1068,34 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             poly.add(new LatLng(lat / 1E5, lng / 1E5));
         }
         return poly;
+    }
+
+    private void enviarUbicacion(double lat, double lng) {
+        if (id_repartidor != -1 && socket != null && socket.connected()) {
+            try {
+                JSONObject data = new JSONObject();
+                data.put("id", id_repartidor);
+                data.put("lat", lat);
+                data.put("lng", lng);
+                socket.emit("ubicacion", data);
+                Log.d("SOCKET", "Ubicación enviada: " + data.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.d("SOCKET", "Socket no conectado o id_repartidor no válido");
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (fusedLocationClient != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
+        if (socket != null) {
+            socket.disconnect();
+        }
     }
 
 }
