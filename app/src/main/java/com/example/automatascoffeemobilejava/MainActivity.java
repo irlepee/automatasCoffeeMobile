@@ -36,6 +36,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.example.automatascoffeemobilejava.data.API;
 import com.example.automatascoffeemobilejava.data.requests.CompleteRequest;
+import com.example.automatascoffeemobilejava.data.requests.CompraRequest;
 import com.example.automatascoffeemobilejava.data.requests.DataRequest;
 import com.example.automatascoffeemobilejava.data.requests.LoginRequest;
 import com.example.automatascoffeemobilejava.data.requests.LogoutRequest;
@@ -955,6 +956,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             );
                             String apiKey = "AIzaSyCyGHnAIzv3n8PjibgZ7HQTMwzbuMvktDY"; // Reemplaza con tu clave de API
                             mostrarRuta(api, destino, apiKey);
+
+                            CompraRequest compraRequest = new CompraRequest(id_repartidor, id_Pedido);
+                            String json = new Gson().toJson(compraRequest);
+                            Log.d("COMPRA_REQUEST", json);
+                            api.get(compraRequest).enqueue(new retrofit2.Callback<LogoutResponse>() {
+                                @Override
+                                public void onResponse(Call<LogoutResponse> call, Response<LogoutResponse> response) {
+                                    if (response.isSuccessful()) {
+                                    } else {
+                                    }
+                                }
+                                @Override
+                                public void onFailure(Call<LogoutResponse> call, Throwable t) {
+                                }
+                            });
                         }
                     }
                 }

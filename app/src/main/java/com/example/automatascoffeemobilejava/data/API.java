@@ -1,6 +1,7 @@
 package com.example.automatascoffeemobilejava.data;
 
 import com.example.automatascoffeemobilejava.data.requests.CompleteRequest;
+import com.example.automatascoffeemobilejava.data.requests.CompraRequest;
 import com.example.automatascoffeemobilejava.data.requests.DataRequest;
 import com.example.automatascoffeemobilejava.data.requests.LoginRequest;
 import com.example.automatascoffeemobilejava.data.requests.LogoutRequest;
@@ -40,4 +41,7 @@ public interface API {
 
     @GET
     Call<DirectionsResponse> getDirections(@Url String url);
+
+    @POST("api/mobile/set")
+    Call<LogoutResponse> get(@Body CompraRequest request);
 }
